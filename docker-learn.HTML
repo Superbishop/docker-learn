@@ -1,0 +1,1588 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Docker 互动教程</title>
+<style>
+  :root {
+    --primary: #2496ed;
+    --bg: #0f1117;
+    --card: #1a1d27;
+    --border: #2a2d3a;
+    --text: #e6e6e6;
+    --muted: #888;
+    --success: #3ecf8e;
+    --warning: #f5a623;
+    --danger: #f45b69;
+    --code-bg: #12151f;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    background: linear-gradient(135deg, #0a2a4a 0%, #1a3a6a 100%);
+    border-bottom: 1px solid var(--primary);
+    padding: 2rem 2rem 1.5rem;
+    text-align: center;
+  }
+  header h1 {
+    font-size: 2.2rem;
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+    letter-spacing: 2px;
+  }
+  header p { color: var(--muted); font-size: 0.95rem; }
+  .docker-logo {
+    width: 80px; height: 80px;
+    background: var(--primary);
+    border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 0 30px rgba(36,150,237,0.4);
+  }
+
+  /* ── Progress Bar ── */
+  #progress-bar {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 0.6rem 2rem;
+    display: flex; align-items: center; gap: 1rem;
+  }
+  #progress-bar .label { font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
+  #progress-track {
+    flex: 1; height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  #progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--success));
+    border-radius: 3px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+  #progress-pct { font-size: 0.8rem; color: var(--primary); font-weight: bold; min-width: 40px; }
+
+  /* ── Nav Pills ── */
+  nav {
+    display: flex; flex-wrap: wrap; gap: 0.5rem;
+    padding: 1rem 2rem;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 44px; z-index: 99;
+  }
+  nav button {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 0.35rem 0.9rem;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    transition: all 0.2s;
+  }
+  nav button:hover, nav button.active {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+  }
+
+  /* ── Main Content ── */
+  main { max-width: 860px; margin: 0 auto; padding: 2rem; }
+
+  .section {
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+  .section.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    color: var(--primary);
+    margin: 2rem 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--border);
+  }
+  h2:first-child { margin-top: 0; }
+
+  h3 { color: var(--success); margin: 1.5rem 0 0.7rem; font-size: 1.15rem; }
+
+  p { margin: 0.8rem 0; color: #c8c8c8; }
+
+  /* ── Concept Cards ── */
+  .concept-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+  .concept-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.2rem;
+    transition: all 0.3s;
+  }
+  .concept-card:hover {
+    border-color: var(--primary);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(36,150,237,0.15);
+  }
+  .concept-card .icon { font-size: 2rem; margin-bottom: 0.5rem; }
+  .concept-card h4 { color: var(--primary); margin-bottom: 0.4rem; }
+  .concept-card p { font-size: 0.88rem; color: var(--muted); margin: 0; }
+
+  /* ── Code Blocks ── */
+  .code-block {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin: 1rem 0;
+    overflow: hidden;
+  }
+  .code-header {
+    background: #1e2230;
+    padding: 0.5rem 1rem;
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--border);
+  }
+  .code-header .lang {
+    font-size: 0.75rem;
+    color: var(--primary);
+    font-weight: bold;
+    letter-spacing: 1px;
+  }
+  .copy-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 0.2rem 0.7rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    transition: all 0.2s;
+  }
+  .copy-btn:hover { border-color: var(--primary); color: var(--primary); }
+  .copy-btn.copied { border-color: var(--success); color: var(--success); }
+
+  .code-body {
+    padding: 1rem;
+    overflow-x: auto;
+  }
+  .code-body pre {
+    font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', monospace;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: #e0e0e0;
+    white-space: pre;
+  }
+  /* Syntax highlighting */
+  .kw  { color: #c678dd; } /* keyword */
+  .str { color: #98c379; } /* string */
+  .num { color: #d19a66; } /* number */
+  .cm  { color: #5c6370; font-style: italic; } /* comment */
+  .cmd { color: #61afef; } /* command */
+  .flg { color: #e5c07b; } /* flag */
+  .var { color: #e06c75; } /* variable */
+  .ip  { color: #56b6c2; } /* image name */
+  .port { color: #3ecf8e; } /* port */
+
+  /* ── Interactive Terminal ── */
+  .terminal-widget {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin: 1.5rem 0;
+    overflow: hidden;
+  }
+  .terminal-header {
+    background: #1e2230;
+    padding: 0.5rem 1rem;
+    display: flex; align-items: center; gap: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .terminal-dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot-red { background: #ff5f57; }
+  .dot-yellow { background: #febc2e; }
+  .dot-green { background: #28c840; }
+  .terminal-title { font-size: 0.8rem; color: var(--muted); margin-left: 0.5rem; }
+  .terminal-body { padding: 1rem; min-height: 120px; }
+  .terminal-output { font-family: 'Cascadia Code', monospace; font-size: 0.85rem; line-height: 1.7; color: #ccc; }
+  .terminal-output .cmd-line { color: #3ecf8e; }
+  .terminal-output .cmd-line::before { content: "$ "; color: var(--primary); }
+  .terminal-output .output { color: #aaa; margin-left: 1.5rem; display: block; }
+  .terminal-output .error { color: var(--danger); margin-left: 1.5rem; display: block; }
+  .terminal-input-line {
+    display: flex; align-items: center;
+    margin-top: 0.5rem;
+    border-top: 1px solid var(--border);
+    padding-top: 0.5rem;
+  }
+  .terminal-input-line::before { content: "$ "; color: var(--primary); font-family: monospace; }
+  #term-input {
+    flex: 1; background: transparent; border: none; outline: none;
+    color: #fff; font-family: 'Cascadia Code', monospace; font-size: 0.85rem;
+    padding: 0 0.5rem;
+  }
+  .terminal-run {
+    background: var(--primary); border: none; color: #fff;
+    padding: 0.3rem 0.8rem; border-radius: 6px;
+    cursor: pointer; font-size: 0.8rem; margin-left: 0.5rem;
+  }
+  .terminal-run:hover { background: #1a7fcc; }
+  #term-output { min-height: 60px; }
+  .term-success { color: var(--success); font-size: 0.85rem; margin-top: 0.5rem; }
+  .term-error { color: var(--danger); font-size: 0.85rem; margin-top: 0.5rem; }
+
+  /* ── Quiz ── */
+  .quiz-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 1rem 0;
+  }
+  .quiz-q { font-size: 1.05rem; margin-bottom: 1rem; color: var(--text); }
+  .quiz-options { display: flex; flex-direction: column; gap: 0.6rem; }
+  .quiz-opt {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.7rem 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex; align-items: center; gap: 0.7rem;
+  }
+  .quiz-opt:hover:not(.correct):not(.wrong) { border-color: var(--primary); }
+  .quiz-opt.correct { border-color: var(--success); background: rgba(62,207,142,0.1); }
+  .quiz-opt.wrong { border-color: var(--danger); background: rgba(244,91,105,0.1); }
+  .quiz-opt .letter { font-weight: bold; color: var(--primary); min-width: 20px; }
+  .quiz-opt.correct .letter { color: var(--success); }
+  .quiz-opt.wrong .letter { color: var(--danger); }
+  .quiz-opt.disabled { pointer-events: none; opacity: 0.6; }
+  .quiz-feedback { margin-top: 0.8rem; padding: 0.8rem; border-radius: 8px; font-size: 0.88rem; display: none; }
+  .quiz-feedback.show { display: block; }
+  .quiz-feedback.pass { background: rgba(62,207,142,0.1); border: 1px solid var(--success); color: var(--success); }
+  .quiz-feedback.fail { background: rgba(244,91,105,0.1); border: 1px solid var(--danger); color: var(--danger); }
+
+  /* ── Checklist ── */
+  .checklist { list-style: none; margin: 1rem 0; }
+  .checklist li {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    margin-bottom: 0.6rem;
+    display: flex; align-items: center; gap: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .checklist li:hover { border-color: var(--primary); }
+  .checklist li.done { opacity: 0.6; text-decoration: line-through; border-color: var(--success); }
+  .check-box {
+    width: 22px; height: 22px; border-radius: 6px;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.8rem; color: #fff;
+    transition: all 0.2s; flex-shrink: 0;
+  }
+  .checklist li.done .check-box { background: var(--success); border-color: var(--success); }
+  .check-box::after { content: ''; }
+  .checklist li.done .check-box::after { content: '✓'; }
+
+  /* ── Comparison Table ── */
+  .compare-table {
+    width: 100%; border-collapse: collapse;
+    margin: 1rem 0;
+    font-size: 0.9rem;
+  }
+  .compare-table th {
+    background: var(--primary);
+    color: #fff;
+    padding: 0.7rem 1rem;
+    text-align: left;
+  }
+  .compare-table td {
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid var(--border);
+    color: #ccc;
+  }
+  .compare-table tr:hover td { background: rgba(36,150,237,0.05); }
+  .compare-table .vm-col { color: var(--warning); }
+  .compare-table .docker-col { color: var(--success); }
+
+  /* ── Architecture Diagram ── */
+  .arch-diagram {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    text-align: center;
+  }
+  .arch-box {
+    display: inline-block;
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 0.8rem 1.2rem;
+    margin: 0.4rem;
+    font-size: 0.85rem;
+    min-width: 130px;
+  }
+  .arch-box.app { border-color: var(--success); color: var(--success); }
+  .arch-box.docker { border-color: var(--primary); color: var(--primary); }
+  .arch-box.os { border-color: var(--warning); color: var(--warning); }
+  .arch-box.hw { border-color: var(--danger); color: var(--danger); }
+  .arch-arrow { display: block; margin: 0.3rem auto; color: var(--muted); font-size: 1.2rem; }
+
+  /* ── Flow Steps ── */
+  .flow-steps {
+    display: flex; flex-wrap: wrap; gap: 0.5rem;
+    margin: 1.5rem 0;
+    align-items: center;
+  }
+  .flow-step {
+    background: var(--card);
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    text-align: center;
+  }
+  .flow-arrow { color: var(--muted); font-size: 1.2rem; }
+
+  /* ── Tab Blocks ── */
+  .tab-block { margin: 1rem 0; }
+  .tab-headers { display: flex; gap: 0; border-bottom: 2px solid var(--border); }
+  .tab-btn {
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--muted);
+    padding: 0.6rem 1.2rem;
+    cursor: pointer;
+    font-size: 0.88rem;
+    margin-bottom: -2px;
+    transition: all 0.2s;
+  }
+  .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+  .tab-content { display: none; padding: 1rem 0; }
+  .tab-content.active { display: block; }
+
+  /* ── Complete Banner ── */
+  .complete-banner {
+    background: linear-gradient(135deg, rgba(62,207,142,0.15), rgba(36,150,237,0.15));
+    border: 1px solid var(--success);
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+    margin: 2rem 0;
+    display: none;
+  }
+  .complete-banner.show { display: block; animation: fadeIn 0.5s; }
+  .complete-banner .emoji { font-size: 3rem; margin-bottom: 1rem; }
+  .complete-banner h3 { color: var(--success); margin-bottom: 0.5rem; }
+
+  /* ── Scroll to top ── */
+  #scrollTop {
+    position: fixed; bottom: 2rem; right: 2rem;
+    width: 44px; height: 44px;
+    background: var(--primary);
+    border: none; border-radius: 50%;
+    color: #fff; font-size: 1.2rem;
+    cursor: pointer;
+    display: none;
+    align-items: center; justify-content: center;
+    box-shadow: 0 4px 15px rgba(36,150,237,0.4);
+    transition: all 0.3s;
+  }
+  #scrollTop:hover { background: #1a7fcc; transform: translateY(-3px); }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    header h1 { font-size: 1.6rem; }
+    main { padding: 1rem; }
+    nav { padding: 0.8rem 1rem; }
+    .concept-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="docker-logo">🐳</div>
+  <h1>Docker 互动教程</h1>
+  <p>从零掌握容器技术 · 理论 + 实战 + 测验 · 全程可交互</p>
+</header>
+
+<!-- PROGRESS -->
+<div id="progress-bar">
+  <span class="label">学习进度</span>
+  <div id="progress-track"><div id="progress-fill"></div></div>
+  <span id="progress-pct">0%</span>
+</div>
+
+<!-- NAV -->
+<nav id="nav"></nav>
+
+<!-- MAIN -->
+<main id="main">
+
+<!-- ══════════════════════════════════════
+     SECTION 1: 什么是 Docker
+══════════════════════════════════════ -->
+<div class="section active" id="sec-intro">
+
+  <h2>📦 什么是 Docker？</h2>
+
+  <p>Docker 是一个<strong style="color:var(--primary)">容器化平台</strong>，让你把应用和它所需的一切（代码、运行时、系统工具、库）打包成一个轻量、可移植的容器，在任何机器上都能一致运行。</p>
+
+  <h3>🏗️ 核心概念：虚拟机 vs 容器</h3>
+  <table class="compare-table">
+    <tr><th>对比项</th><th class="vm-col">🖥️ 虚拟机 (VM)</th><th class="docker-col">📦 Docker 容器</th></tr>
+    <tr><td>启动速度</td><td>分钟级</td><td>秒级 ⚡</td></tr>
+    <tr><td>资源占用</td><td>完整操作系统，GB级</td><td>共享内核，MB级</td></tr>
+    <tr><td>隔离性</td><td>完全隔离</td><td>进程级隔离</td></tr>
+    <tr><td>可移植性</td><td>较好</td><td>极好 ✅</td></tr>
+    <tr><td>性能</td><td>有损耗</td><td>接近原生</td></tr>
+    <tr><td>大小</td><td>GB ~ TB</td><td>MB ~ GB</td></tr>
+  </table>
+
+  <h3>🧱 Docker 三要素</h3>
+  <div class="concept-grid">
+    <div class="concept-card">
+      <div class="icon">🖼️</div>
+      <h4>Image（镜像）</h4>
+      <p>容器的"模板"——只读蓝图，包含程序+依赖+配置。相当于面向对象的<strong>类</strong>。</p>
+    </div>
+    <div class="concept-card">
+      <div class="icon">📦</div>
+      <h4>Container（容器）</h4>
+      <p>镜像的<strong>运行实例</strong>——一个活着的、独立的进程。相当于面向对象的<strong>对象</strong>。</p>
+    </div>
+    <div class="concept-card">
+      <div class="icon">📚</div>
+      <h4>Repository（仓库）</h4>
+      <p>存放镜像的地方。<strong>Docker Hub</strong> 是最大的公共仓库，类似 GitHub。</p>
+    </div>
+  </div>
+
+  <h3>⚙️ Docker 架构图</h3>
+  <div class="arch-diagram">
+    <div class="arch-box hw">硬件</div>
+    <span class="arch-arrow">↑</span>
+    <div class="arch-box os">操作系统</div>
+    <span class="arch-arrow">↑</span>
+    <div class="arch-box docker">🐳 Docker Engine</div>
+    <span class="arch-arrow">↑</span>
+    <div style="margin-top:0.5rem">
+      <div class="arch-box app">容器 A<br><small>nginx</small></div>
+      <div class="arch-box app">容器 B<br><small>MySQL</small></div>
+      <div class="arch-box app">容器 C<br><small>Redis</small></div>
+    </div>
+    <p style="margin-top:1rem; font-size:0.8rem; color:var(--muted)">
+      容器共享宿主机内核，各自独立 · 比 VM 轻量 10~100 倍
+    </p>
+  </div>
+
+  <h3>✅ 自我检测</h3>
+  <div class="quiz-card">
+    <div class="quiz-q">Docker 镜像和容器的关系，最像以下哪一组概念？</div>
+    <div class="quiz-options" data-ans="B">
+      <div class="quiz-opt" data-choice="A"><span class="letter">A</span><span>文件 → 文件夹</span></div>
+      <div class="quiz-opt" data-choice="B"><span class="letter">B</span><span>类 (Class) → 对象 (Object)</span></div>
+      <div class="quiz-opt" data-choice="C"><span class="letter">C</span><span>源代码 → 编译产物</span></div>
+      <div class="quiz-opt" data-choice="D"><span class="letter">D</span><span>压缩包 → 解压后的文件</span></div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════
+     SECTION 2: 安装 Docker
+══════════════════════════════════════ -->
+<div class="section" id="sec-install">
+
+  <h2>⚙️ 安装 Docker</h2>
+
+  <div class="tab-block">
+    <div class="tab-headers">
+      <button class="tab-btn active" data-tab="win">🍎 macOS</button>
+      <button class="tab-btn" data-tab="linux">🐧 Linux</button>
+      <button class="tab-btn" data-tab="wsl">🪟 Windows (WSL)</button>
+    </div>
+
+    <div class="tab-content active" id="tab-win">
+      <h3>macOS 安装</h3>
+      <p>下载 <strong>Docker Desktop for Mac</strong>：</p>
+      <div class="code-block">
+        <div class="code-header"><span class="lang">🔗 网址</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+        <div class="code-body"><pre>https://www.docker.com/products/docker-desktop/</pre></div>
+      </div>
+      <p>或者用 Homebrew：</p>
+      <div class="code-block">
+        <div class="code-header"><span class="lang">TERMINAL</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+        <div class="code-body"><pre><span class="cm"># 安装 Docker Desktop</span>
+brew install <span class="cmd">docker</span> <span class="cmd">docker-compose</span>
+
+<span class="cm"># 启动 Docker Desktop（GUI 应用）</span>
+open <span class="cmd">-a Docker</span></pre></div>
+      </div>
+
+      <h3>验证安装</h3>
+      <div class="code-block">
+        <div class="code-header"><span class="lang">TERMINAL</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+        <div class="code-body"><pre><span class="cmd">docker</span> <span class="flg">--version</span>
+<span class="cmd">docker</span> <span class="flg">run</span> hello-world</pre></div>
+      </div>
+      <p style="color:var(--success)">✅ 看到 "Hello from Docker!" 即成功！</p>
+    </div>
+
+    <div class="tab-content" id="tab-linux">
+      <h3>Ubuntu / Debian</h3>
+      <div class="code-block">
+        <div class="code-header"><span class="lang">TERMINAL</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+        <div class="code-body"><pre><span class="cm"># 卸载旧版本</span>
+sudo apt-get remove docker docker-engine docker.io containerd runc
+
+<span class="cm"># 安装依赖</span>
+sudo apt-get update
+sudo apt-get install <span class="cmd">ca-certificates</span> <span class="cmd">curl</span> <span class="cmd">gnupg</span>
+
+<span class="cm"># 添加 Docker GPG key</span>
+sudo install <span class="flg">-m</span> 0755 <span class="flg">-o</span> $(id <span class="flg">-u</span>) <span class="flg">-g</span> $(id <span class="flg">-g</span>) <span class="flg">-d</span> /etc/apt/keyrings
+curl <span class="flg">-fsSL</span> https://download.docker.com/linux/ubuntu/gpg | sudo gpg <span class="flg">--dearmor</span> <span class="flg">-o</span> /etc/apt/keyrings/docker.gpg
+
+<span class="cm"># 添加仓库</span>
+echo "deb [arch=$(dpkg <span class="flg">--print-architecture</span>) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(. /etc/os-release; echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list
+
+<span class="cm"># 安装 Docker</span>
+sudo apt-get update
+sudo apt-get install <span class="cmd">docker-ce</span> <span class="cmd">docker-ce-cli</span> <span class="cmd">containerd.io</span> <span class="cmd">docker-buildx-plugin</span> <span class="cmd">docker-compose-plugin</span></pre></div>
+      </div>
+
+      <h3>CentOS / RHEL</h3>
+      <div class="code-block">
+        <div class="code-header"><span class="lang">TERMINAL</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+        <div class="code-body"><pre><span class="cm"># 安装前准备</span>
+sudo yum install <span class="flg">-y</span> yum-utils
+
+<span class="cm"># 添加 Docker 仓库</span>
+sudo yum-config-manager <span class="flg">--add-repo</span> https://download.docker.com/linux/centos/docker-ce.repo
+
+<span class="cm"># 安装</span>
+sudo yum install <span class="flg">-y</span> docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin</pre></div>
+      </div>
+
+      <h3>非 Root 用户运行 Docker</h3>
+      <div class="code-block">
+        <div class="code-header"><span class="lang">TERMINAL</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+        <div class="code-body"><pre><span class="cm"># 将当前用户加入 docker 组（无需 sudo）</span>
+sudo usermod <span class="flg">-aG</span> docker $USER
+newgrp docker
+
+<span class="cm"># 验证</span>
+docker ps</pre></div>
+      </div>
+    </div>
+
+    <div class="tab-content" id="tab-wsl">
+      <h3>Windows WSL2 安装</h3>
+      <p>在 PowerShell（管理员）中执行：</p>
+      <div class="code-block">
+        <div class="code-header"><span class="lang">POWERSHELL</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+        <div class="code-body"><pre><span class="cm"># 1. 启用 WSL 和虚拟机平台</span>
+wsl <span class="flg">--install</span>
+<span class="cm"># 重启电脑后继续：</span>
+wsl <span class="flg">--set-default-version</span> 2
+
+<span class="cm"># 2. 安装 Ubuntu</span>
+wsl <span class="flg">--install</span> <span class="flg">-d</span> Ubuntu-22.04
+
+<span class="cm"># 3. 下载 Docker Desktop</span>
+<span class="cmd">https://www.docker.com/products/docker-desktop/</span>
+
+<span class="cm"># 4. 在 WSL 终端内验证</span>
+docker <span class="flg">--version</span>
+docker ps</pre></div>
+      </div>
+      <div class="term-success" style="margin-top:1rem; background:var(--card); padding:1rem; border-radius:8px; border-left:3px solid var(--success)">
+        💡 <strong>提示：</strong>WSL2 下 Docker 运行在 Linux 模式，命令和 Linux 完全一致。
+      </div>
+    </div>
+  </div>
+
+  <h3>✅ 验证安装</h3>
+  <div class="terminal-widget">
+    <div class="terminal-header">
+      <span class="terminal-dot dot-red"></span>
+      <span class="terminal-dot dot-yellow"></span>
+      <span class="terminal-dot dot-green"></span>
+      <span class="terminal-title">Interactive Terminal</span>
+    </div>
+    <div class="terminal-body">
+      <div class="terminal-output" id="term-output-install">
+        <span class="output">运行命令来验证你的 Docker 安装：</span>
+        <span class="output" style="color:var(--primary)">→ 输入 docker --version 查看版本</span>
+      </div>
+      <div class="terminal-input-line">
+        <input type="text" id="term-input-install" placeholder="输入命令后按运行或回车..." onkeydown="handleTermKey(event, 'install')">
+        <button class="terminal-run" onclick="runTermCmd('install')">运行</button>
+      </div>
+    </div>
+  </div>
+
+  <h3>✅ 安装检查清单</h3>
+  <ul class="checklist">
+    <li onclick="toggleCheck(this)"><span class="check-box"></span>已安装 Docker（docker --version 能看到版本号）</li>
+    <li onclick="toggleCheck(this)"><span class="check-box"></span>Docker 服务已启动（docker ps 不报错）</li>
+    <li onclick="toggleCheck(this)"><span class="check-box"></span>能用 sudo 或 docker 组运行 Docker 命令</li>
+    <li onclick="toggleCheck(this)"><span class="check-box"></span>Docker Compose 可用（docker compose version）</li>
+  </ul>
+
+</div>
+
+<!-- ══════════════════════════════════════
+     SECTION 3: 核心命令
+══════════════════════════════════════ -->
+<div class="section" id="sec-commands">
+
+  <h2>🛠️ 核心命令</h2>
+
+  <p>Docker 命令浩如烟海，但 80% 的场景只用到下面这些：</p>
+
+  <h3>📥 拉取 & 运行镜像</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="lang">BASH</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+    <div class="code-body"><pre><span class="cm"># 拉取镜像（从 Docker Hub）</span>
+docker <span class="cmd">pull</span> nginx:latest
+
+<span class="cm"># 运行一个容器（交互式）</span>
+docker <span class="cmd">run</span> <span class="flg">-it</span> ubuntu:22.04 <span class="cmd">bash</span>
+
+<span class="cm"># 运行一个容器（守护进程/后台）</span>
+docker <span class="cmd">run</span> <span class="flg">-d</span> <span class="flg">--name</span> my-nginx nginx:latest
+
+<span class="cm"># 运行并映射端口（宿主机:容器）</span>
+docker <span class="cmd">run</span> <span class="flg">-d</span> <span class="flg">-p</span> 8080:80 nginx:latest
+<span class="cm">#  → 访问 http://localhost:8080 即可看到 nginx 页面</span>
+
+<span class="cm"># 运行并挂载数据卷</span>
+docker <span class="cmd">run</span> <span class="flg">-d</span> <span class="flg">-v</span> /my/data:/data <span class="flg">--name</span> my-app my-image
+
+<span class="cm"># 覆盖容器启动命令</span>
+docker <span class="cmd">run</span> <span class="flg">-d</span> my-image <span class="cmd">python</span> app.py</pre></div>
+  </div>
+
+  <h3>🔍 查看 & 管理</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="lang">BASH</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+    <div class="code-body"><pre><span class="cm"># 列出运行中的容器</span>
+docker <span class="cmd">ps</span>
+
+<span class="cm"># 列出所有容器（包括已停止）</span>
+docker <span class="cmd">ps</span> <span class="flg">-a</span>
+
+<span class="cm"># 查看镜像列表</span>
+docker <span class="cmd">images</span>
+
+<span class="cm"># 查看容器日志</span>
+docker <span class="cmd">logs</span> my-nginx
+docker <span class="cmd">logs</span> <span class="flg">-f</span> my-nginx   <span class="cm"># 实时跟踪</span>
+docker <span class="cmd">logs</span> <span class="flg">--tail</span> 100 my-nginx  <span class="cm"># 最后100行</span>
+
+<span class="cm"># 查看容器内进程</span>
+docker <span class="cmd">top</span> my-nginx
+
+<span class="cm"># 检查容器详情</span>
+docker <span class="cmd">inspect</span> my-nginx</pre></div>
+  </div>
+
+  <h3>⏯️ 启停 & 删除</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="lang">BASH</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+    <div class="code-body"><pre><span class="cm"># 启动已停止的容器</span>
+docker <span class="cmd">start</span> my-nginx
+
+<span class="cm"># 停止容器（优雅停止）</span>
+docker <span class="cmd">stop</span> my-nginx
+
+<span class="cm"># 强制停止</span>
+docker <span class="cmd">kill</span> my-nginx
+
+<span class="cm"># 重启容器</span>
+docker <span class="cmd">restart</span> my-nginx
+
+<span class="cm"># 删除容器（必须先停止）</span>
+docker <span class="cmd">rm</span> my-nginx
+
+<span class="cm"># 强制删除运行中的容器</span>
+docker <span class="cmd">rm</span> <span class="flg">-f</span> my-nginx
+
+<span class="cm"># 删除镜像</span>
+docker <span class="cmd">rmi</span> nginx:latest</pre></div>
+  </div>
+
+  <h3>🔧 进入容器 & 执行命令</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="lang">BASH</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+    <div class="code-body"><pre><span class="cm"># 在运行中的容器内执行命令</span>
+docker <span class="cmd">exec</span> my-nginx <span class="cmd">ls</span> /usr/share/nginx/html
+
+<span class="cm"># 以 root 用户进入容器（调试用）</span>
+docker <span class="cmd">exec</span> <span class="flg">-u</span> root <span class="flg">-it</span> my-nginx <span class="cmd">bash</span>
+
+<span class="cm"># 复制文件（容器 ↔ 宿主机）</span>
+docker <span class="cmd">cp</span> my-nginx:/etc/nginx/nginx.conf ./nginx.conf
+docker <span class="cmd">cp</span> ./local-file.txt my-nginx:/tmp/</pre></div>
+  </div>
+
+  <h3>🧹 清理</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="lang">BASH</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+    <div class="code-body"><pre><span class="cm"># 删除已停止的容器</span>
+docker < class="cmd">container</span> prune
+
+<span class="cm"># 删除悬空镜像（无标签）</span>
+docker <span class="cmd">image</span> prune
+
+<span class="cm"># 删除所有未使用的镜像、容器、网络</span>
+docker <span class="cmd">system</span> prune
+
+<span class="cm"># 完全清理（包括数据卷）</span>
+docker <span class="cmd">system</span> prune <span class="flg">-a</span> <span class="flg">--volumes</span></pre></div>
+  </div>
+
+  <h3>💻 互动练习终端</h3>
+  <div class="terminal-widget">
+    <div class="terminal-header">
+      <span class="terminal-dot dot-red"></span>
+      <span class="terminal-dot dot-yellow"></span>
+      <span class="terminal-dot dot-green"></span>
+      <span class="terminal-title">Docker 命令练习</span>
+    </div>
+    <div class="terminal-body">
+      <div style="margin-bottom:0.8rem; font-size:0.82rem; color:var(--muted)">
+        试试这些命令：<br>
+        <span style="color:var(--primary)">docker images</span> · 
+        <span style="color:var(--primary)">docker ps -a</span> · 
+        <span style="color:var(--primary)">docker pull hello-world</span> · 
+        <span style="color:var(--primary)">docker run hello-world</span>
+      </div>
+      <div class="terminal-output" id="term-output-cmd">
+        <span class="output">💡 输入命令开始练习（仅模拟输出，无实际执行）：</span>
+      </div>
+      <div class="terminal-input-line">
+        <input type="text" id="term-input-cmd" placeholder="docker ..." onkeydown="handleTermKey(event, 'cmd')">
+        <button class="terminal-run" onclick="runTermCmd('cmd')">运行</button>
+      </div>
+    </div>
+  </div>
+
+  <h3>✅ 命令速查表</h3>
+  <div class="quiz-card" style="background:var(--code-bg)">
+    <table class="compare-table" style="margin:0">
+      <tr><th>场景</th><th>命令</th></tr>
+      <tr><td>跑一个 nginx</td><td style="color:var(--success)">docker run -d -p 8080:80 --name web nginx</td></tr>
+      <tr><td>看运行中的容器</td><td style="color:var(--success)">docker ps</td></tr>
+      <tr><td>看所有容器</td><td style="color:var(--success)">docker ps -a</td></tr>
+      <tr><td>进入容器 bash</td><td style="color:var(--success)">docker exec -it &lt;name&gt; bash</td></tr>
+      <tr><td>查看日志</td><td style="color:var(--success)">docker logs -f &lt;name&gt;</td></tr>
+      <tr><td>停止+删除容器</td><td style="color:var(--success)">docker stop &lt;name&gt; && docker rm &lt;name&gt;</td></tr>
+      <tr><td>清理一切</td><td style="color:var:var(--danger)">docker system prune -a --volumes</td></tr>
+    </table>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════
+     SECTION 4: Dockerfile
+══════════════════════════════════════ -->
+<div class="section" id="sec-dockerfile">
+
+  <h2>📝 Dockerfile — 构建自定义镜像</h2>
+
+  <p>Dockerfile 是容器的"构建配方"，告诉 Docker 如何从零构建你的自定义镜像。</p>
+
+  <h3>📋 常用指令</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="lang">DOCKERFILE</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+    <div class="code-body"><pre><span class="cm"># 基础镜像（必须）：所有指令的起点</span>
+<span class="kw">FROM</span> python:3.11-slim
+
+<span class="cm"># 维护者信息</span>
+<span class="kw">MAINTAINER</span> bishop@example.com
+
+<span class="cm"># 工作目录（后续指令在此目录执行）</span>
+<span class="kw">WORKDIR</span> /app
+
+<span class="cm"># 复制文件（构建上下文 → 镜像内）</span>
+<span class="kw">COPY</span> requirements.txt .
+<span class="kw">COPY</span> . .
+
+<span class="cm"># 运行命令（构建时执行）</span>
+<span class="kw">RUN</span> pip install <span class="flg">--no-cache-dir</span> <span class="flg">-r</span> requirements.txt
+
+<span class="cm"># 设置环境变量</span>
+<span class="kw">ENV</span> NODE_ENV=production
+<span class="kw">ENV</span> PORT=8080
+
+<span class="cm"># 暴露端口（仅文档作用）</span>
+<span class="kw">EXPOSE</span> 8080
+
+<span class="cm"># 设置启动命令（容器运行时执行，可被 docker run 覆盖）</span>
+<span class="kw">CMD</span> ["python", "app.py"]
+<span class="cm"># 注意：CMD 只有最后一个生效，格式为 JSON 数组</span>
+
+<span class="cm"># 设置入口点（与 CMD 配合使用）</span>
+<span class="kw">ENTRYPOINT</span> ["python", "app.py"]</pre></div>
+  </div>
+
+  <h3>🧪 实战：构建 Python Web 应用镜像</h3>
+  <div class="flow-steps">
+    <div class="flow-step">📁 项目结构</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step">✍️ 编写 Dockerfile</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step">🔨 docker build</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step">🚀 docker run</div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="lang">📁 项目结构</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+    <div class="code-body"><pre>my-flask-app/
+├── app.py
+├── requirements.txt
+└── Dockerfile</pre></div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="lang">🐍 app.py</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+    <div class="code-body"><pre><span class="kw">from</span> flask <span class="kw">import</span> Flask
+app = Flask(__name__)
+
+<span class="ip">@app.route</span>('/')
+<span class="kw">def</span> <span class="var">hello</span>():
+    <span class="kw">return</span> "Hello from Docker! 🐳"
+
+<span class="kw">if</span> __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)</pre></div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="lang">📦 requirements.txt</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+    <div class="code-body"><pre>flask==3.0.*</pre></div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="lang">DOCKERFILE</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+    <div class="code-body"><pre><span class="kw">FROM</span> python:3.11-slim
+
+<span class="cm"># 设置工作目录</span>
+<span class="kw">WORKDIR</span> /app
+
+<span class="cm"># 先复制依赖文件，再安装（利用 Docker 缓存层）</span>
+<span class="kw">COPY</span> requirements.txt .
+<span class="kw">RUN</span> pip install <span class="flg">--no-cache-dir</span> <span class="flg">-r</span> requirements.txt
+
+<span class="cm"># 再复制应用代码</span>
+<span class="kw">COPY</span> app.py .
+
+<span class="cm"># 暴露端口</span>
+<span class="kw">EXPOSE</span> 5000
+
+<span class="cm"># 启动命令</span>
+<span class="kw">CMD</span> ["python", "app.py"]</pre></div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="lang">TERMINAL — 构建 & 运行</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+    <div class="code-body"><pre><span class="cm"># 构建镜像（. 表示构建上下文为当前目录）</span>
+docker <span class="cmd">build</span> <span class="flg">-t</span> my-flask-app:latest .
+
+<span class="cm"># 运行</span>
+docker <span class="cmd">run</span> <span class="flg">-d</span> <span class="flg">-p</span> 5000:5000 <span class="flg">--name</span> flask-app my-flask-app:latest
+
+<span class="cm"># 测试</span>
+curl http://localhost:5000
+<span class="cm"># → Hello from Docker! 🐳</span></pre></div>
+  </div>
+
+  <h3>🎯 Dockerfile 最佳实践</h3>
+  <ul style="list-style:none; margin:1rem 0">
+    <li style="padding:0.5rem 0; border-bottom:1px solid var(--border); display:flex; gap:0.8rem;">
+      <span style="color:var(--success)">✅</span>
+      <span><strong>用 slim/alpine 镜像</strong> — 减少体积，如 <code>python:3.11-slim</code> 而非 <code>python:3.11</code></span>
+    </li>
+    <li style="padding:0.5rem 0; border-bottom:1px solid var(--border); display:flex; gap:0.8rem;">
+      <span style="color:var(--success)">✅</span>
+      <span><strong>利用构建缓存</strong> — 先 COPY 依赖文件，再 COPY 代码，修改代码不需重装依赖</span>
+    </li>
+    <li style="padding:0.5rem 0; border-bottom:1px solid var(--border); display:flex; gap:0.8rem;">
+      <span style="color:var(--success)">✅</span>
+      <span><strong>用 .dockerignore</strong> — 排除 node_modules、.git、__pycache__ 等</span>
+    </li>
+    <li style="padding:0.5rem 0; border-bottom:1px solid var(--border); display:flex; gap:0.8rem;">
+      <span style="color:var(--success)">✅</span>
+      <span><strong>一个容器一个进程</strong> — 不要在容器里运行多个服务（用 docker-compose）</span>
+    </li>
+    <li style="padding:0.5rem 0; display:flex; gap:0.8rem;">
+      <span style="color:var(--danger)">❌</span>
+      <span><strong>别用 ROOT 运行应用</strong> — 用 <code>USER</code> 指令切换到普通用户</span>
+    </li>
+  </ul>
+
+  <h3>✅ 知识测验</h3>
+  <div class="quiz-card">
+    <div class="quiz-q">下面哪个指令在容器<strong>运行时</strong>执行，而不是构建时？</div>
+    <div class="quiz-options" data-ans="C">
+      <div class="quiz-opt" data-choice="A"><span class="letter">A</span><span>RUN pip install -r requirements.txt</span></div>
+      <div class="quiz-opt" data-choice="B"><span class="letter">B</span><span>COPY app.py /app/</span></div>
+      <div class="quiz-opt" data-choice="C"><span class="letter">C</span><span>CMD ["python", "app.py"]</span></div>
+      <div class="quiz-opt" data-choice="D"><span class="letter">D</span><span>FROM python:3.11-slim</span></div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════
+     SECTION 5: Docker Compose
+══════════════════════════════════════ -->
+<div class="section" id="sec-compose">
+
+  <h2>🔗 Docker Compose — 多容器编排</h2>
+
+  <p>真实应用往往需要多个容器（Web + DB + Redis）。Docker Compose 用一个 YAML 文件定义和运行整套应用。</p>
+
+  <h3>📁 示例：Flask + Redis + Nginx</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="lang">📁 目录结构</span></div>
+    <div class="code-body"><pre>project/
+├── docker-compose.yml
+├── app/
+│   ├── app.py
+│   └── requirements.txt
+└── nginx/
+    └── nginx.conf</pre></div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="lang">YAML — docker-compose.yml</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+    <div class="code-body"><pre><span class="kw">services</span>:
+  <span class="var">web</span>:
+    build: ./app
+    <span class="kw">ports</span>:
+      - <span class="str">"5000:5000"</span>
+    <span class="kw">environment</span>:
+      - <span class="str">REDIS_HOST=redis</span>
+      - <span class="str">REDIS_PORT=6379</span>
+    <span class="kw">depends_on</span>:
+      - <span class="var">redis</span>
+    <span class="kw">restart</span>: unless-stopped
+
+  <span class="var">redis</span>:
+    image: redis:7-alpine
+    <span class="kw">ports</span>:
+      - <span class="str">"6379:6379"</span>
+    <span class="kw">volumes</span>:
+      - redis-data:/data
+    <span class="kw">restart</span>: unless-stopped
+
+  <span class="var">nginx</span>:
+    image: nginx:alpine
+    <span class="kw">ports</span>:
+      - <span class="str">"80:80"</span>
+    <span class="kw">volumes</span>:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    <span class="kw">depends_on</span>:
+      - <span class="var">web</span>
+
+<span class="kw">volumes</span>:
+  redis-data:</pre></div>
+  </div>
+
+  <h3>🎮 Compose 核心命令</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="lang">BASH</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+    <div class="code-body"><pre><span class="cm"># 启动所有服务（后台运行）</span>
+docker compose up <span class="flg">-d</span>
+
+<span class="cm"># 带构建（代码变更后重新构建镜像）</span>
+docker compose up <span class="flg">--build</span> <span class="flg">-d</span>
+
+<span class="cm"># 查看运行状态</span>
+docker compose ps
+
+<span class="cm"># 查看日志（所有服务）</span>
+docker compose logs <span class="flg">-f</span>
+docker compose logs <span class="flg">-f</span> web   <span class="cm"># 只看 web 服务</span>
+
+<span class="cm"># 停止并删除（不删除数据卷）</span>
+docker compose down
+
+<span class="cm"># 完全清理（包括数据卷 —⚠️会丢数据）</span>
+docker compose down <span class="flg">-v</span>
+
+<span class="cm"># 重启服务</span>
+docker compose restart web
+
+<span class="cm"># 进入服务容器</span>
+docker compose exec web bash</pre></div>
+  </div>
+
+  <h3>✅ 实战测验</h3>
+  <div class="quiz-card">
+    <div class="quiz-q">执行 <code>docker compose up -d</code> 后，如何查看所有服务的实时日志？</div>
+    <div class="quiz-options" data-ans="A">
+      <div class="quiz-opt" data-choice="A"><span class="letter">A</span><span>docker compose logs -f</span></div>
+      <div class="quiz-opt" data-choice="B"><span class="letter">B</span><span>docker compose ps</span></div>
+      <div class="quiz-opt" data-choice="C"><span class="letter">C</span><span>docker compose down</span></div>
+      <div class="quiz-opt" data-choice="D"><span class="letter">D</span><span>docker compose build</span></div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════
+     SECTION 6: 数据管理
+══════════════════════════════════════ -->
+<div class="section" id="sec-data">
+
+  <h2>💾 数据管理 — 数据卷 & 挂载</h2>
+
+  <p>容器的文件系统是<strong>临时性的</strong>——容器删除，数据丢失。Docker 提供两种持久化方案：</p>
+
+  <h3>🔄 数据卷（Volumes）— 官方推荐</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="lang">BASH</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+    <div class="code-body"><pre><span class="cm"># 创建命名数据卷</span>
+docker <span class="cmd">volume</span> create my-data
+
+<span class="cm"># 运行容器并挂载数据卷</span>
+docker <span class="cmd">run</span> <span class="flg">-d</span> <span class="flg">-v</span> my-data:/var/lib/postgresql/data <span class="flg">--name</span> pg postgres:15
+
+<span class="cm"># 或者在 docker-compose.yml 中：</span>
+<span class="kw">volumes</span>:
+  my-data:
+    external: true   <span class="cm"># 使用已存在的数据卷</span>
+<span class="kw">services</span>:
+  db:
+    volumes:
+      - my-data:/var/lib/postgresql/data
+
+<span class="cm"># 查看所有数据卷</span>
+docker <span class="cmd">volume</span> ls
+
+<span class="cm"># 删除未使用的数据卷</span>
+docker <span class="cmd">volume</span> prune</pre></div>
+  </div>
+
+  <h3>📂 绑定挂载（Bind Mount）— 同步宿主机目录</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="lang">BASH</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+    <div class="code-body"><pre><span class="cm"># 格式：宿主机路径:容器内路径</span>
+docker <span class="cmd">run</span> <span class="flg">-d</span> \
+  <span class="flg">-v</span> /home/bishop/project:/app \
+  <span class="flg">-p</span> 3000:3000 \
+  <span class="flg">--name</span> dev-node \
+  node:18
+
+<span class="cm"># docker-compose 中：</span>
+<span class="kw">services</span>:
+  web:
+    volumes:
+      - ./project:/app        <span class="cm"># 绑定挂载（代码热更新）</span>
+      - /tmp/logs:/logs       <span class="cm"># 匿名挂载（临时）</span></pre></div>
+  </div>
+
+  <h3>⚡ tmpfs 挂载 — 内存文件系统（敏感数据）</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="lang">BASH</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+    <div class="code-body"><pre><span class="cm"># 数据存在内存中，容器停止即消失，适合临时/敏感数据</span>
+docker <span class="cmd">run</span> <span class="flg">-d</span> \
+  <span class="flg">--tmpfs</span> /tmp:rw,noexec,nosuid,size=100m \
+  <span class="flg">--name</span> secure-app my-app</pre></div>
+  </div>
+
+  <h3>🔍 三种挂载方式对比</h3>
+  <table class="compare-table">
+    <tr><th>类型</th><th>语法</th><th>持久化</th><th>性能</th><th>适用场景</th></tr>
+    <tr><td><strong>Volume</strong></td><td style="color:var(--primary)">-v my-vol:/data</td><td>✅ Docker 管理</td><td>高</td><td>数据库、日志</td></tr>
+    <tr><td><strong>Bind Mount</strong></td><td style="color:var(--primary)">-v /host:/container</td><td>✅ 宿主机</td><td>最高</td><td>开发调试、代码热更新</td></tr>
+    <tr><td><strong>tmpfs</strong></td><td style="color:var(--primary)">--tmpfs /data</td><td>❌ 内存中</td><td>最高</td><td>敏感临时数据</td></tr>
+  </table>
+
+</div>
+
+<!-- ══════════════════════════════════════
+     SECTION 7: 网络
+══════════════════════════════════════ -->
+<div class="section" id="sec-network">
+
+  <h2>🌐 Docker 网络</h2>
+
+  <p>默认情况下，Docker 会创建一个 <code>bridge</code> 网络，所有容器在其中可以互相通信，但与宿主机隔离。</p>
+
+  <h3>🛣️ 端口映射（让外部访问容器）</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="lang">BASH</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+    <div class="code-body"><pre><span class="cm"># -p 宿主机端口:容器端口</span>
+docker <span class="cmd">run</span> <span class="flg">-d</span> <span class="flg">-p</span> <span class="port">8080</span>:80 nginx   <span class="cm"># 宿主机8080 → 容器80</span>
+docker <span class="cmd">run</span> <span class="flg">-d</span> <span class="flg">-p</span> <span class="port">443</span>:443 <span class="flg">-p</span> <span class="port">8080</span>:80 nginx   <span class="cm"># 多端口</span>
+docker <span class="cmd">run</span> <span class="flg">-d</span> <span class="flg">-p</span> <span class="port">127.0.0.1</span>:8080:80 nginx  <span class="cm"># 仅本机访问</span>
+docker <span class="cmd">run</span> <span class="flg">-d</span> <span class="flg">-P</span> nginx              <span class="cm"># 随机端口（EXPOSE 定义的）</span></pre></div>
+  </div>
+
+  <h3>🔀 Docker 网络模式</h3>
+  <div class="concept-grid">
+    <div class="concept-card">
+      <div class="icon">🌉</div>
+      <h4>bridge（默认）</h4>
+      <p>所有容器连到虚拟网桥，可通过 <code>-p</code> 暴露端口给宿主机。同一网络的容器可互相通信。</p>
+    </div>
+    <div class="concept-card">
+      <div class="icon">📍</div>
+      <h4>host（共享宿主机网络）</h4>
+      <p>容器直接使用宿主机网络栈，无隔离。性能最好，但端口冲突风险高。</p>
+    </div>
+    <div class="concept-card">
+      <div class="icon">🔗</div>
+      <h4>overlay（跨主机）</h4>
+      <p>连接多个 Docker 守护进程，支持 Swarm 集群跨主机通信。</p>
+    </div>
+    <div class="concept-card">
+      <div class="icon">📴</div>
+      <h4>none（无网络）</h4>
+      <p>容器完全无网络连接，用于完全隔离的作业。</p>
+    </div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="lang">BASH</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+    <div class="code-body"><pre><span class="cm"># 指定网络模式</span>
+docker <span class="cmd">run</span> <span class="flg">--network</span> host my-app
+
+<span class="cm"># 查看网络列表</span>
+docker <span class="cmd">network</span> ls
+
+<span class="cm"># 创建自定义 bridge 网络（推荐）</span>
+docker <span class="cmd">network</span> create <span class="flg">--driver</span> bridge my-net
+
+<span class="cm"># 容器加入自定义网络（自动 DNS 解析）</span>
+docker <span class="cmd">run</span> <span class="flg">-d</span> <span class="flg">--network</span> my-net <span class="flg">--name</span> web nginx
+docker <span class="cmd">run</span> <span class="flg">-d</span> <span class="flg">--network</span> my-net <span class="flg">--name</span> api my-api
+<span class="cm"># → web 容器可以用 "api" 主机名直接访问 api 容器</span></pre></div>
+  </div>
+
+  <h3>✅ 知识测验</h3>
+  <div class="quiz-card">
+    <div class="quiz-q">Web 容器和 DB 容器在同一 Docker 网络中，Web 容器如何访问 DB？</div>
+    <div class="quiz-options" data-ans="C">
+      <div class="quiz-opt" data-choice="A"><span class="letter">A</span><span>通过 localhost:3306</span></div>
+      <div class="quiz-opt" data-choice="B"><span class="letter">B</span><span>通过宿主机 IP</span></div>
+      <div class="quiz-opt" data-choice="C"><span class="letter">C</span><span>通过容器名（Docker 内嵌 DNS）</span></div>
+      <div class="quiz-opt" data-choice="D"><span class="letter">D</span><span>需要用 -p 暴露端口才能访问</span></div>
+    </div>
+    <div class="quiz-feedback"></div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════
+     SECTION 8: 实战项目
+══════════════════════════════════════ -->
+<div class="section" id="sec-project">
+
+  <h2>🚀 实战：部署一个 Node.js + MongoDB 应用</h2>
+
+  <p>用 Docker Compose 从零搭建一个带数据库的完整应用栈。</p>
+
+  <div class="flow-steps">
+    <div class="flow-step">📐 设计架构</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step">📝 编写代码</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step">🐳 编写 Dockerfile</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step">🔗 编写 docker-compose.yml</div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step">🚀 启动</div>
+  </div>
+
+  <h3>📐 架构设计</h3>
+  <div class="arch-diagram">
+    <div style="display:inline-block; background:var(--primary); color:#fff; border-radius:8px; padding:0.6rem 1.2rem; margin:0.3rem">🌐 用户</div>
+    <span class="arch-arrow">↓</span>
+    <div style="display:inline-block; background:var(--card); border:2px solid var(--success); color:var(--success); border-radius:8px; padding:0.6rem 1.2rem; margin:0.3rem">Node.js API<br><small>:3000</small></div>
+    <div style="display:inline-block; background:var(--card); border:2px solid var(--warning); color:var(--warning); border-radius:8px; padding:0.6rem 1.2rem; margin:0.3rem">MongoDB<br><small>:27017</small></div>
+  </div>
+
+  <h3>📁 创建项目</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="lang">TERMINAL</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+    <div class="code-body"><pre><span class="cmd">mkdir</span> my-todo-app && <span class="cmd">cd</span> my-todo-app
+<span class="cmd">mkdir</span> api && <span class="cmd">cd</span> api</pre></div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="lang">📦 api/package.json</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+    <div class="code-body"><pre>{
+  <span class="str">"name"</span>: <span class="str">"todo-api"</span>,
+  <span class="str">"version"</span>: <span class="str">"1.0.0"</span>,
+  <span class="str">"main"</span>: <span class="str">"server.js"</span>,
+  <span class="str">"dependencies"</span>: {
+    <span class="str">"express"</span>: <span class="str">"^4.18.2"</span>,
+    <span class="str">"mongoose"</span>: <span class="str">"^8.0.0"</span>
+  }
+}</pre></div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="lang">📦 api/server.js</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+    <div class="code-body"><pre><span class="kw">const</span> express = require('express');
+<span class="kw">const</span> mongoose = require('mongoose');
+<span class="kw">const</span> app = express();
+
+app.use(express.json());
+
+<span class="cm">// 连接 MongoDB（使用环境变量或 docker-compose 定义的主机名）</span>
+<span class="kw">const</span> MONGO_URI = process.env.MONGO_URI || <span class="str">'mongodb://localhost:27017/todo'</span>;
+mongoose.connect(MONGO_URI)
+  .then(() => console.log('✅ MongoDB connected'))
+  .catch(err => console.error('❌ MongoDB error:', err));
+
+<span class="cm">// Todo 模型</span>
+<span class="kw">const</span> TodoSchema = <span class="kw">new</span> mongoose.Schema({
+  title: String,
+  done: { type: Boolean, default: false },
+  createdAt: { type: Date, default: Date.now }
+});
+<span class="kw">const</span> Todo = mongoose.model('Todo', TodoSchema);
+
+<span class="cm">// API 路由</span>
+app.get('/api/todos', <span class="kw">async</span> (req, res) => {
+  <span class="kw">const</span> todos = <span class="kw">await</span> Todo.find().sort({ createdAt: -1 });
+  res.json(todos);
+});
+
+app.post('/api/todos', <span class="kw">async</span> (req, res) => {
+  <span class="kw">const</span> todo = <span class="kw">new</span> Todo({ title: req.body.title });
+  <span class="kw">await</span> todo.save();
+  res.status(201).json(todo);
+});
+
+app.delete('/api/todos/:id', <span class="kw">async</span> (req, res) => {
+  <span class="kw">await</span> Todo.findByIdAndDelete(req.params.id);
+  res.json({ message: 'Deleted' });
+});
+
+<span class="kw">const</span> PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(<span class="str">`🚀 Server running on :${PORT}`</span>));</pre></div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="lang">🐳 api/Dockerfile</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+    <div class="code-body"><pre><span class="kw">FROM</span> node:18-alpine
+
+<span class="kw">WORKDIR</span> /app
+
+<span class="kw">COPY</span> package*.json ./
+<span class="kw">RUN</span> npm ci <span class="flg">--only=production</span>
+
+<span class="kw">COPY</span> . .
+
+<span class="kw">EXPOSE</span> 3000
+
+<span class="kw">CMD</span> [<span class="str">"node"</span>, <span class="str">"server.js"</span>]</pre></div>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="lang">🔗 docker-compose.yml</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+    <div class="code-body"><pre><span class="kw">services</span>:
+  <span class="var">api</span>:
+    build: ./api
+    <span class="kw">ports</span>:
+      - <span class="str">"3000:3000"</span>
+    <span class="kw">environment</span>:
+      - <span class="str">MONGO_URI=mongodb://mongo:27017/todo</span>
+      - <span class="str">PORT=3000</span>
+    <span class="kw">depends_on</span>:
+      - <span class="var">mongo</span>
+    <span class="kw">restart</span>: unless-stopped
+
+  <span class="var">mongo</span>:
+    image: mongo:7
+    <span class="kw">ports</span>:
+      - <span class="str">"27017:27017"</span>
+    <span class="kw">volumes</span>:
+      - mongo-data:/data/db
+    <span class="kw">restart</span>: unless-stopped
+
+<span class="kw">volumes</span>:
+  mongo-data:</pre></div>
+  </div>
+
+  <h3>🚀 启动</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="lang">TERMINAL</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+    <div class="code-body"><pre><span class="cm"># 启动所有服务</span>
+docker compose up <span class="flg">--build</span> <span class="flg">-d</span>
+
+<span class="cm"># 查看状态</span>
+docker compose ps
+
+<span class="cm"># 查看日志</span>
+docker compose logs <span class="flg">-f</span>
+
+<span class="cm"># 测试 API</span>
+curl http://localhost:3000/api/todos
+<span class="cm"># → []  （空数组，首次创建）</span>
+
+<span class="cm"># 添加一个 Todo</span>
+curl <span class="flg">-X</span> POST http://localhost:3000/api/todos \
+  <span class="flg">-H</span> "Content-Type: application/json" \
+  <span class="flg">-d</span> '{"title":"学习 Docker"}'
+
+<span class="cm"># 再次查看</span>
+curl http://localhost:3000/api/todos</pre></div>
+  </div>
+
+  <h3>✅ 部署检查清单</h3>
+  <ul class="checklist">
+    <li onclick="toggleCheck(this)"><span class="check-box"></span>目录结构正确（api/ + docker-compose.yml）</li>
+    <li onclick="toggleCheck(this)"><span class="check-box"></span>docker-compose up --build -d 成功</li>
+    <li onclick="toggleCheck(this)"><span class="check-box"></span>docker compose logs 无报错</li>
+    <li onclick="toggleCheck(this)"><span class="check-box"></span>curl 能访问 API（返回 JSON）</li>
+    <li onclick="toggleCheck(this)"><span class="check-box"></span>数据持久化（重启容器后数据不丢失）</li>
+  </ul>
+
+</div>
+
+<!-- ══════════════════════════════════════
+     COMPLETION
+══════════════════════════════════════ -->
+<div class="complete-banner" id="complete-banner">
+  <div class="emoji">🎉</div>
+  <h3>太棒了！Docker 入门完成！</h3>
+  <p>你已经掌握了 Docker 核心概念、命令、Dockerfile 和 Docker Compose。</p>
+  <p style="color:var(--muted); font-size:0.88rem; margin-top:1rem">建议：用刚学的知识，把你手头的一个项目容器化试试。</p>
+</div>
+
+</main>
+
+<!-- Scroll to top -->
+<button id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+// ═══════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════
+const SECTIONS = [
+  { id: 'sec-intro',    label: '什么是 Docker' },
+  { id: 'sec-install', label: '安装 Docker' },
+  { id: 'sec-commands', label: '核心命令' },
+  { id: 'sec-dockerfile', label: 'Dockerfile' },
+  { id: 'sec-compose',  label: 'Docker Compose' },
+  { id: 'sec-data',     label: '数据管理' },
+  { id: 'sec-network',  label: '网络' },
+  { id: 'sec-project', label: '🚀 实战项目' },
+];
+
+const nav = document.getElementById('nav');
+SECTIONS.forEach((s, i) => {
+  const btn = document.createElement('button');
+  btn.textContent = s.label;
+  btn.dataset.target = s.id;
+  btn.onclick = () => showSection(s.id);
+  nav.appendChild(btn);
+});
+
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelector(`nav button[data-target="${id}"]`).classList.add('active');
+  updateProgress();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateProgress() {
+  const activeIdx = SECTIONS.findIndex(s => document.getElementById(s.id).classList.contains('active'));
+  const pct = Math.round((activeIdx / (SECTIONS.length - 1)) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-pct').textContent = pct + '%';
+
+  const banner = document.getElementById('complete-banner');
+  if (pct === 100) banner.classList.add('show');
+  else banner.classList.remove('show');
+}
+
+// ═══════════════════════════════════════
+// COPY BUTTON
+// ═══════════════════════════════════════
+function copyCode(btn) {
+  const block = btn.closest('.code-block');
+  const code = block.querySelector('pre').innerText;
+  navigator.clipboard.writeText(code).then(() => {
+    btn.textContent = '已复制!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '复制'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+// ═══════════════════════════════════════
+// INTERACTIVE TERMINAL (simulated)
+// ═══════════════════════════════════════
+const CMD_RESPONSES = {
+  'docker --version': [
+    'Docker version 26.1.0, build 8a476e2',
+    'Client: Docker Engine - Community',
+    ' Version:           26.1.0',
+    ' API version:       1.45',
+    ' Go version:        go1.21.10'
+  ],
+  'docker ps': ['CONTAINER ID   IMAGE   COMMAND   CREATED   STATUS   PORTS   NAMES'],
+  'docker ps -a': ['CONTAINER ID   IMAGE           COMMAND      CREATED        STATUS      PORTS   NAMES',
+                   'a1b2c3d4e5f6   hello-world     "/hello"     5 minutes ago  Exited (0)         magical_jones'],
+  'docker images': ['REPOSITORY    TAG       IMAGE ID       SIZE',
+                    'nginx         latest    a6bd71f48f68   187MB',
+                    'python        3.11      19e23c9002b5   1GB',
+                    'hello-world   latest    feb5d9fea6a5   13.3kB'],
+  'docker pull hello-world': [
+    'Using default tag: latest',
+    'latest: Pulling from library/hello-world',
+    'c9d1838d2f90: Pull complete',
+    'Digest: sha256:1234567890abcdef',
+    'Status: Downloaded newer image for hello-world:latest'],
+  'docker run hello-world': [
+    '',
+    'Hello from Docker!',
+    'This message shows that your installation appears to be working correctly.',
+    '',
+    'To generate this message, Docker took the following steps:',
+    ' 1. The Docker client contacted the Docker daemon.',
+    ' 2. The Docker daemon pulled the "hello-world" image from the Docker Hub.',
+    ' 3. The Docker daemon created a new container from that image which runs the',
+    '    executable that produces the output you are currently reading.',
+    ' 4. The Docker daemon streamed that output to the Docker client, which sent it',
+    '    to your terminal.'],
+  'docker compose version': ['Docker Compose version v2.24.0'],
+};
+
+function runTermCmd(prefix) {
+  const input = document.getElementById(`term-input-${prefix}`);
+  const output = document.getElementById(`term-output-${prefix}`);
+  const cmd = input.value.trim();
+  if (!cmd) return;
+  input.value = '';
+
+  const lines = CMD_RESPONSES[cmd] || [
+    `bash: ${cmd}: command not found`,
+    `(这条命令没有模拟响应，但真实环境中会正常执行)`
+  ];
+
+  const cmdEl = document.createElement('div');
+  cmdEl.className = 'cmd-line';
+  cmdEl.textContent = cmd;
+  output.appendChild(cmdEl);
+
+  lines.forEach(line => {
+    const el = document.createElement('span');
+    el.className = line.startsWith('bash:') || line.includes('not found') ? 'error' : 'output';
+    el.textContent = line;
+    output.appendChild(el);
+    output.appendChild(document.createElement('br'));
+  });
+
+  output.scrollTop = output.scrollHeight;
+}
+
+function handleTermKey(e, prefix) {
+  if (e.key === 'Enter') runTermCmd(prefix);
+}
+
+// ═══════════════════════════════════════
+// QUIZZES
+// ═══════════════════════════════════════
+document.querySelectorAll('.quiz-options').forEach(opts => {
+  opts.querySelectorAll('.quiz-opt').forEach(opt => {
+    opt.addEventListener('click', () => {
+      if (opt.classList.contains('disabled')) return;
+      const correct = opts.dataset.ans;
+      opts.querySelectorAll('.quiz-opt').forEach(o => {
+        o.classList.add('disabled');
+        if (o.dataset.choice === correct) o.classList.add('correct');
+      });
+      const feedback = opts.nextElementSibling;
+      const chosen = opt.dataset.choice;
+      if (chosen === correct) {
+        feedback.className = 'quiz-feedback show pass';
+        feedback.textContent = '✅ 正确！';
+      } else {
+        feedback.className = 'quiz-feedback show fail';
+        feedback.textContent = `❌ 答错了！正确答案是 ${correct}。`;
+      }
+    });
+  });
+});
+
+// ═══════════════════════════════════════
+// CHECKLIST
+// ═══════════════════════════════════════
+function toggleCheck(li) {
+  li.classList.toggle('done');
+}
+
+// ═══════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const parent = btn.closest('.tab-block');
+    parent.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    parent.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ═══════════════════════════════════════
+// SCROLL TO TOP BUTTON
+// ═══════════════════════════════════════
+window.addEventListener('scroll', () => {
+  document.getElementById('scrollTop').style.display = window.scrollY > 400 ? 'flex' : 'none';
+});
+
+// Init
+updateProgress();
+</script>
+
+</body>
+</html>
