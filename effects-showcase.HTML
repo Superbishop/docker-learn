@@ -1,0 +1,1838 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Web 交互效果展示 — 关键词速查</title>
+<style>
+/* ═══════════════════════════════════════════════════════════
+   全局基础
+══════════════════════════════════════════════════════════ */
+:root {
+  --bg: #0a0a0f;
+  --card: #111118;
+  --border: #1e1e2e;
+  --text: #e0e0e0;
+  --muted: #666;
+  --accent: #7c3aed;
+  --accent2: #06b6d4;
+  --accent3: #f59e0b;
+  --success: #10b981;
+  --danger: #ef4444;
+  --code-bg: #0d1117;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', 'PingFang SC', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   导航栏
+══════════════════════════════════════════════════════════ */
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  background: rgba(10,10,15,0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0.7rem 2rem;
+  display: flex; align-items: center; gap: 1rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.nav::-webkit-scrollbar { display: none; }
+.nav a {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  transition: all 0.2s;
+}
+.nav a:hover, .nav a.active {
+  color: #fff;
+  background: var(--accent);
+}
+
+main { max-width: 1100px; margin: 0 auto; padding: 5rem 1.5rem 3rem; }
+
+section { margin-bottom: 5rem; }
+
+h2 {
+  font-size: 1.4rem;
+  color: var(--accent2);
+  margin: 2rem 0 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 0.6rem;
+}
+h2 .icon { font-size: 1.2rem; }
+h3 { color: var(--accent3); margin: 1.5rem 0 0.7rem; font-size: 1rem; }
+
+.intro {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+}
+.intro p { color: #aaa; font-size: 0.9rem; margin: 0.4rem 0; }
+.intro code {
+  background: var(--code-bg);
+  color: var(--accent2);
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  font-size: 0.82rem;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   关键词标签区
+══════════════════════════════════════════════════════════ */
+.tag-grid {
+  display: flex; flex-wrap: wrap; gap: 0.5rem;
+  margin: 0.8rem 0;
+}
+.tag {
+  background: var(--code-bg);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  padding: 0.2rem 0.7rem;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+}
+.tag:hover { background: var(--accent); color: #fff; }
+
+/* ═══════════════════════════════════════════════════════════
+   效果展示区通用
+══════════════════════════════════════════════════════════ */
+.demo-area {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 2rem;
+  min-height: 160px;
+  display: flex; flex-wrap: wrap;
+  align-items: center; justify-content: center;
+  gap: 1.5rem;
+  margin: 1rem 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.label {
+  position: absolute;
+  top: 0.7rem; left: 1rem;
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   按钮效果
+══════════════════════════════════════════════════════════ */
+
+/* 1. 霓虹辉光按钮 */
+.btn-neon {
+  padding: 0.7rem 1.8rem;
+  background: transparent;
+  border: 2px solid #0ff;
+  color: #0ff;
+  font-size: 0.95rem;
+  border-radius: 8px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: color 0.3s;
+  box-shadow: 0 0 8px rgba(0,255,255,0.3), inset 0 0 8px rgba(0,255,255,0.1);
+}
+.btn-neon::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: #0ff;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+}
+.btn-neon:hover::before { transform: scaleX(1); }
+.btn-neon:hover { color: #000; }
+.btn-neon span { position: relative; z-index: 1; }
+
+/* 2. 玻璃态按钮 */
+.btn-glass {
+  padding: 0.7rem 1.8rem;
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff;
+  font-size: 0.95rem;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+.btn-glass:hover {
+  background: rgba(255,255,255,0.15);
+  border-color: rgba(255,255,255,0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(124,58,237,0.3);
+}
+
+/* 3. 涟漪效果按钮 */
+.btn-ripple {
+  padding: 0.7rem 1.8rem;
+  background: var(--accent);
+  border: none;
+  color: #fff;
+  font-size: 0.95rem;
+  border-radius: 8px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.3s;
+}
+.btn-ripple::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.4);
+  transform: scale(0);
+  transition: transform 0.5s, opacity 0.5s;
+  opacity: 0;
+}
+.btn-ripple:active::after {
+  transform: scale(4);
+  opacity: 0;
+  transition: 0s;
+}
+.btn-ripple:active { background: #6d28d9; }
+
+/* 4. 粒子爆炸按钮 */
+.btn-particle {
+  padding: 0.7rem 1.8rem;
+  background: linear-gradient(135deg, #7c3aed, #06b6d4);
+  border: none;
+  color: #fff;
+  font-size: 0.95rem;
+  border-radius: 8px;
+  cursor: pointer;
+  position: relative;
+  overflow: visible;
+  transition: transform 0.15s, box-shadow 0.3s;
+}
+.btn-particle:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 10px 30px rgba(124,58,237,0.5);
+}
+.btn-particle:active { transform: scale(0.96); }
+
+/* 5. 边框流动按钮 */
+.btn-border-flow {
+  padding: 0.7rem 1.8rem;
+  background: var(--card);
+  border: 2px solid transparent;
+  color: #fff;
+  font-size: 0.95rem;
+  border-radius: 8px;
+  cursor: pointer;
+  position: relative;
+  background-clip: padding-box;
+}
+.btn-border-flow::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #7c3aed, #06b6d4, #f59e0b, #7c3aed);
+  background-size: 300% 100%;
+  animation: borderFlow 3s linear infinite;
+  z-index: -1;
+}
+@keyframes borderFlow {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 300% 50%; }
+}
+
+/* 6. 磁吸悬停按钮 */
+.btn-magnetic {
+  padding: 0.7rem 1.8rem;
+  background: var(--success);
+  border: none;
+  color: #fff;
+  font-size: 0.95rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: box-shadow 0.3s;
+}
+.btn-magnetic:hover {
+  box-shadow: 0 0 0 8px rgba(16,185,129,0.2), 0 0 20px rgba(16,185,129,0.4);
+}
+
+/* 7. 打字效果按钮 */
+.btn-typewrite {
+  padding: 0.7rem 1.8rem;
+  background: #1a1a2e;
+  border: 2px solid var(--accent3);
+  color: var(--accent3);
+  font-size: 0.95rem;
+  border-radius: 8px;
+  cursor: pointer;
+  overflow: hidden;
+  min-width: 160px;
+  text-align: center;
+}
+
+/* 8. 滑块切换按钮 */
+.toggle-btn {
+  width: 56px; height: 28px;
+  background: var(--border);
+  border-radius: 14px;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.3s;
+}
+.toggle-btn::after {
+  content: '';
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 22px; height: 22px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.3s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+.toggle-btn.on { background: var(--accent); }
+.toggle-btn.on::after { transform: translateX(28px); }
+
+/* ═══════════════════════════════════════════════════════════
+   背景效果
+══════════════════════════════════════════════════════════ */
+
+/* 1. 极光背景 */
+.bg-aurora {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 50%, #0a1a2e 100%);
+  overflow: hidden;
+}
+.bg-aurora::before {
+  content: '';
+  position: absolute;
+  width: 600px; height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(124,58,237,0.3) 0%, transparent 70%);
+  top: -200px; left: -200px;
+  animation: aurora1 8s ease-in-out infinite alternate;
+}
+.bg-aurora::after {
+  content: '';
+  position: absolute;
+  width: 500px; height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(6,182,212,0.25) 0%, transparent 70%);
+  bottom: -150px; right: -150px;
+  animation: aurora2 10s ease-in-out infinite alternate;
+}
+@keyframes aurora1 {
+  0% { transform: translate(0,0) scale(1); }
+  100% { transform: translate(100px,50px) scale(1.2); }
+}
+@keyframes aurora2 {
+  0% { transform: translate(0,0) scale(1); }
+  100% { transform: translate(-80px,-30px) scale(1.1); }
+}
+
+/* 2. 星空背景 */
+.bg-stars {
+  position: absolute;
+  inset: 0;
+  background: #050510;
+  overflow: hidden;
+}
+.bg-stars::before, .bg-stars::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(2px 2px at 20px 30px, #fff, transparent),
+    radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
+    radial-gradient(1px 1px at 90px 40px, #fff, transparent),
+    radial-gradient(2px 2px at 160px 120px, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1px 1px at 230px 80px, #fff, transparent),
+    radial-gradient(2px 2px at 300px 150px, rgba(255,255,255,0.7), transparent),
+    radial-gradient(1px 1px at 350px 200px, #fff, transparent),
+    radial-gradient(2px 2px at 420px 60px, rgba(255,255,255,0.5), transparent);
+  background-size: 450px 250px;
+  animation: starTwinkle 4s ease-in-out infinite alternate;
+}
+.bg-stars::after {
+  background-size: 600px 300px;
+  animation-delay: -2s;
+  opacity: 0.5;
+}
+@keyframes starTwinkle {
+  0% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+/* 3. 粒子漂浮背景 */
+.bg-particles {
+  position: absolute;
+  inset: 0;
+  background: #0a0a1a;
+  overflow: hidden;
+}
+.particle {
+  position: absolute;
+  width: 4px; height: 4px;
+  background: var(--accent2);
+  border-radius: 50%;
+  opacity: 0.6;
+  animation: particleFloat linear infinite;
+}
+@keyframes particleFloat {
+  0% { transform: translateY(100%) translateX(0); opacity: 0; }
+  10% { opacity: 0.6; }
+  90% { opacity: 0.6; }
+  100% { transform: translateY(-100vh) translateX(30px); opacity: 0; }
+}
+
+/* 4. 渐变网格背景 */
+.bg-gradient-grid {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(rgba(124,58,237,0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(124,58,237,0.1) 1px, transparent 1px),
+    linear-gradient(135deg, #0a0a1a, #0f1a2e);
+  background-size: 50px 50px, 50px 50px, 100% 100%;
+  animation: gridMove 20s linear infinite;
+}
+@keyframes gridMove {
+  0% { background-position: 0 0, 0 0, 0 0; }
+  100% { background-position: 50px 50px, 50px 0, 0 0; }
+}
+
+/* 5. 液态波纹背景 */
+.bg-liquid {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #0a0020, #001a2e);
+  overflow: hidden;
+}
+.bg-liquid::before {
+  content: '';
+  position: absolute;
+  width: 200%; height: 200%;
+  top: -50%; left: -50%;
+  background: radial-gradient(ellipse at 30% 50%, rgba(124,58,237,0.2) 0%, transparent 50%),
+              radial-gradient(ellipse at 70% 50%, rgba(6,182,212,0.15) 0%, transparent 50%);
+  animation: liquidWave 6s ease-in-out infinite;
+}
+@keyframes liquidWave {
+  0%, 100% { transform: translate(0,0) rotate(0deg); }
+  33% { transform: translate(2%, 1%) rotate(1deg); }
+  66% { transform: translate(-1%, 2%) rotate(-1deg); }
+}
+
+/* 6. 玻璃态毛玻璃背景 */
+.bg-glass {
+  position: absolute;
+  inset: 0;
+  background:
+    url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400"><circle cx="100" cy="100" r="80" fill="%237c3aed20"/><circle cx="300" cy="200" r="120" fill="%2306b6d420"/></svg>'),
+    linear-gradient(135deg, #1a1a2e, #0a1a2e);
+  background-size: 400px 400px, 100% 100%;
+  backdrop-filter: blur(1px);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   卡片效果
+══════════════════════════════════════════════════════════ */
+
+/* 1. 3D 翻转卡片 */
+.card-3d {
+  width: 160px; height: 100px;
+  perspective: 600px;
+  cursor: pointer;
+}
+.card-3d-inner {
+  width: 100%; height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.7s;
+}
+.card-3d:hover .card-3d-inner { transform: rotateY(180deg); }
+.card-3d-front, .card-3d-back {
+  position: absolute; inset: 0;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  backface-visibility: hidden;
+  font-size: 0.85rem;
+}
+.card-3d-front {
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  color: #fff;
+}
+.card-3d-back {
+  background: linear-gradient(135deg, var(--accent3), #f97316);
+  color: #fff;
+  transform: rotateY(180deg);
+}
+
+/* 2. 悬浮上浮卡片 */
+.card-hover-lift {
+  width: 160px; height: 100px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.35s;
+}
+.card-hover-lift:hover {
+  transform: translateY(-8px);
+  border-color: var(--accent);
+  box-shadow: 0 12px 30px rgba(124,58,237,0.25);
+}
+
+/* 3. 边框渐变卡片 */
+.card-border-gradient {
+  width: 160px; height: 100px;
+  background: var(--card);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.85rem;
+  cursor: pointer;
+  position: relative;
+}
+.card-border-gradient::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  padding: 2px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2), var(--accent3));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  transition: opacity 0.3s;
+  opacity: 0.5;
+}
+.card-border-gradient:hover::before { opacity: 1; }
+
+/* 4. 玻璃态卡片 */
+.card-glass {
+  width: 160px; height: 100px;
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.85rem;
+  color: #ccc;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
+/* 5. 图片+文字毛玻璃卡片 */
+.card-glass-overlay {
+  width: 200px;
+  height: 130px;
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  background: linear-gradient(135deg, #1a0533, #0a2a4a);
+}
+.card-glass-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, transparent 60%);
+  z-index: 1;
+}
+.card-glass-overlay .card-text {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 1rem;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(10px);
+  z-index: 2;
+  font-size: 0.82rem;
+  color: #fff;
+  transform: translateY(30px);
+  transition: transform 0.3s;
+}
+.card-glass-overlay:hover .card-text { transform: translateY(0); }
+
+/* 6. 磁吸扭曲卡片 */
+.card-magnetic {
+  width: 160px; height: 100px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   文字效果
+══════════════════════════════════════════════════════════ */
+
+.text-3d {
+  font-size: 2.5rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #7c3aed, #06b6d4, #f59e0b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: none;
+  filter: drop-shadow(0 4px 8px rgba(124,58,237,0.4));
+  letter-spacing: 2px;
+}
+
+.text-glitch {
+  font-size: 2rem;
+  font-weight: 900;
+  color: #fff;
+  position: relative;
+  cursor: pointer;
+}
+.text-glitch:hover { animation: glitch 0.3s infinite; }
+@keyframes glitch {
+  0% { text-shadow: 2px 0 var(--accent), -2px 0 var(--accent2); }
+  25% { text-shadow: -2px 0 var(--accent), 2px 0 var(--accent3); }
+  50% { text-shadow: 2px 2px var(--accent2), -2px -2px var(--accent); }
+  75% { text-shadow: -2px 2px var(--accent3), 2px -2px var(--accent2); }
+  100% { text-shadow: 2px 0 var(--accent), -2px 0 var(--accent2); }
+}
+
+.text-shimmer {
+  font-size: 2rem;
+  font-weight: 900;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+.text-shimmer::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 0; top: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 2.5s linear infinite;
+  width: 100%;
+}
+@keyframes shimmer {
+  0% { clip-path: inset(0 100% 0 0); }
+  100% { clip-path: inset(0 0 0 100%); }
+}
+
+.text-fire {
+  font-size: 2rem;
+  font-weight: 900;
+  color: #fff;
+  position: relative;
+  cursor: pointer;
+}
+.text-fire:hover { animation: fireText 0.15s infinite; }
+@keyframes fireText {
+  0% { text-shadow: 0 0 10px #f97316, 0 0 20px #f97316, 0 0 30px #ef4444; color: #fff3c4; }
+  50% { text-shadow: 0 0 20px #f97316, 0 0 40px #ef4444, 0 0 60px #dc2626; color: #fff; }
+  100% { text-shadow: 0 0 10px #f97316, 0 0 20px #f97316, 0 0 30px #ef4444; color: #fff3c4; }
+}
+
+.text-neon-glow {
+  font-size: 2rem;
+  font-weight: 900;
+  color: #0ff;
+  text-shadow: 0 0 5px #0ff, 0 0 10px #0ff, 0 0 20px #0ff, 0 0 40px #0ff;
+  animation: neonPulse 2s ease-in-out infinite alternate;
+  cursor: pointer;
+}
+@keyframes neonPulse {
+  0% { text-shadow: 0 0 5px #0ff, 0 0 10px #0ff, 0 0 20px #0ff; }
+  100% { text-shadow: 0 0 10px #0ff, 0 0 25px #0ff, 0 0 50px #0ff, 0 0 80px #0ff; }
+}
+
+.text-typing {
+  font-family: monospace;
+  font-size: 1.5rem;
+  color: var(--success);
+  border-right: 3px solid var(--success);
+  white-space: nowrap;
+  overflow: hidden;
+  width: 0;
+  animation: typing 3s steps(20) 1s forwards, blinkCursor 0.7s step-end infinite;
+}
+@keyframes typing {
+  to { width: 18ch; }
+}
+@keyframes blinkCursor {
+  50% { border-color: transparent; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   加载动画
+══════════════════════════════════════════════════════════ */
+
+.loader-dots {
+  display: flex; gap: 8px; align-items: center;
+}
+.loader-dots span {
+  width: 10px; height: 10px;
+  background: var(--accent);
+  border-radius: 50%;
+  animation: dotBounce 1.2s ease-in-out infinite;
+}
+.loader-dots span:nth-child(2) { animation-delay: 0.2s; }
+.loader-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes dotBounce {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.5; }
+  40% { transform: scale(1.2); opacity: 1; }
+}
+
+.loader-spinner {
+  width: 40px; height: 40px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loader-pulse {
+  width: 40px; height: 40px;
+  background: var(--accent);
+  border-radius: 50%;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+@keyframes pulse {
+  0% { transform: scale(0.8); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.4; }
+  100% { transform: scale(0.8); opacity: 1; }
+}
+
+.loader-bar {
+  width: 120px; height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.loader-bar::after {
+  content: '';
+  display: block;
+  width: 40%;
+  height: 100%;
+  background: var(--accent2);
+  border-radius: 2px;
+  animation: barSlide 1.2s ease-in-out infinite;
+}
+@keyframes barSlide {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(350%); }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   鼠标/交互效果
+══════════════════════════════════════════════════════════ */
+
+/* 1. 鼠标追踪光点 */
+.cursor-trail-dot {
+  position: absolute;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--accent2);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.cursor-trail-dot.active { opacity: 1; }
+
+/* 2. 鼠标跟随圆圈 */
+.cursor-follower {
+  position: absolute;
+  width: 30px; height: 30px;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  pointer-events: none;
+  transition: transform 0.15s ease-out, width 0.2s, height 0.2s, border-color 0.2s;
+  opacity: 0.6;
+}
+
+/* 3. 点击爆炸粒子 */
+.explosion-particle {
+  position: absolute;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: explode 0.6s ease-out forwards;
+}
+@keyframes explode {
+  0% { transform: translate(0,0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; }
+}
+
+/* 4. 视差层 */
+.parallax-layer {
+  position: absolute;
+  inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 5rem;
+  opacity: 0.15;
+}
+
+/* 5. 滚轮缩放文字 */
+.scale-on-scroll {
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--accent2);
+  transition: transform 0.1s;
+  display: inline-block;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   表单/输入框效果
+══════════════════════════════════════════════════════════ */
+
+.input-glow {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: #fff;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  outline: none;
+  width: 200px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+.input-glow:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 12px rgba(124,58,237,0.4);
+}
+
+.input-float-label {
+  position: relative;
+  width: 200px;
+}
+.input-float-label input {
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: #fff;
+  padding: 1rem 1rem 0.5rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.3s;
+}
+.input-float-label input:focus { border-color: var(--accent2); }
+.input-float-label label {
+  position: absolute;
+  left: 1rem; top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  font-size: 0.85rem;
+  pointer-events: none;
+  transition: all 0.2s;
+}
+.input-float-label input:focus ~ label,
+.input-float-label input:not(:placeholder-shown) ~ label {
+  top: 0.4rem;
+  transform: none;
+  font-size: 0.7rem;
+  color: var(--accent2);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   滚动动画
+══════════════════════════════════════════════════════════ */
+
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.6s ease;
+}
+.scroll-reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   进度条/仪表盘
+══════════════════════════════════════════════════════════ */
+
+.progress-ring {
+  width: 80px; height: 80px;
+  position: relative;
+}
+.progress-ring svg {
+  transform: rotate(-90deg);
+}
+.progress-ring circle {
+  fill: none;
+  stroke-width: 6;
+}
+.progress-ring .bg { stroke: var(--border); }
+.progress-ring .fg {
+  stroke: var(--accent);
+  stroke-dasharray: 220;
+  stroke-dashoffset: 220;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1s ease;
+}
+.progress-ring .text {
+  position: absolute;
+  inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.9rem; font-weight: bold; color: #fff;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   标签页/折叠
+══════════════════════════════════════════════════════════ */
+
+.tabs-demo { width: 100%; }
+.tab-headers-demo { display: flex; border-bottom: 2px solid var(--border); }
+.tab-btn-demo {
+  background: none;
+  border: none;
+  color: var(--muted);
+  padding: 0.6rem 1.2rem;
+  cursor: pointer;
+  font-size: 0.88rem;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s;
+}
+.tab-btn-demo.active { color: var(--accent2); border-bottom-color: var(--accent2); }
+.tab-content-demo {
+  display: none;
+  padding: 1rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  font-size: 0.88rem; color: #aaa;
+}
+.tab-content-demo.active { display: block; }
+
+/* ═══════════════════════════════════════════════════════════
+   弹窗/模态框
+══════════════════════════════════════════════════════════ */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(8px);
+  z-index: 2000;
+  display: none;
+  align-items: center; justify-content: center;
+  animation: fadeIn 0.2s;
+}
+.modal-overlay.show { display: flex; }
+.modal-box {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 2rem;
+  max-width: 400px;
+  width: 90%;
+  animation: slideUp 0.3s ease;
+}
+@keyframes slideUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.modal-box h3 { color: #fff; margin-bottom: 0.8rem; }
+.modal-box p { color: #aaa; font-size: 0.88rem; margin-bottom: 1.2rem; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* ═══════════════════════════════════════════════════════════
+   特效覆盖层
+══════════════════════════════════════════════════════════ */
+
+/* 扫描线 */
+.scanlines::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.03) 2px,
+    rgba(0,0,0,0.03) 4px
+  );
+  pointer-events: none;
+}
+
+/* CRT 效果 */
+.crt::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 0%, rgba(0,0,0,0.3) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   工具函数
+══════════════════════════════════════════════════════════ */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.code-block {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin: 1rem 0;
+  overflow: hidden;
+}
+.code-header {
+  background: #1e2230;
+  padding: 0.5rem 1rem;
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid var(--border);
+}
+.code-header .lang { font-size: 0.75rem; color: var(--accent2); font-weight: bold; }
+.copy-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 0.15rem 0.6rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.72rem;
+}
+.copy-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+.code-body { padding: 1rem; overflow-x: auto; }
+.code-body pre { font-family: 'Cascadia Code', monospace; font-size: 0.82rem; line-height: 1.6; color: #ccc; }
+.kw { color: #c678dd; } .str { color: #98c379; } .cm { color: #5c6370; font-style: italic; }
+.fl { color: #3ecf8e; } .at { color: #e5c07b; }
+
+.swatch-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.8rem 0; }
+.swatch {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s;
+  border: 2px solid transparent;
+}
+.swatch:hover { transform: scale(1.2); border-color: #fff; }
+
+/* Toast */
+.toast-container {
+  position: fixed;
+  bottom: 2rem; right: 2rem;
+  z-index: 3000;
+  display: flex; flex-direction: column; gap: 0.5rem;
+}
+.toast {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.8rem 1.2rem;
+  font-size: 0.85rem;
+  color: #fff;
+  animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+.toast.success { border-left: 3px solid var(--success); }
+.toast.error { border-left: 3px solid var(--danger); }
+@keyframes toastIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes toastOut { from { opacity: 1; } to { opacity: 0; transform: translateX(50px); } }
+
+/* 键盘按键 */
+kbd {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.78rem;
+  color: var(--accent2);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   响应式
+══════════════════════════════════════════════════════════ */
+@media (max-width: 600px) {
+  main { padding: 4.5rem 1rem 2rem; }
+  .nav { padding: 0.5rem 1rem; }
+  .demo-area { padding: 1.5rem 1rem; }
+  .text-3d, .text-glitch, .text-shimmer, .text-fire, .text-neon-glow { font-size: 1.5rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═════════════════ NAV ═════════════════ -->
+<nav class="nav" id="nav">
+  <a href="#colors">色彩</a>
+  <a href="#buttons">按钮</a>
+  <a href="#backgrounds">背景</a>
+  <a href="#cards">卡片</a>
+  <a href="#text">文字</a>
+  <a href="#loaders">加载</a>
+  <a href="#inputs">输入框</a>
+  <a href="#mouse">鼠标</a>
+  <a href="#scroll">滚动</a>
+  <a href="#modal">弹窗</a>
+  <a href="#toast">提示</a>
+</nav>
+
+<!-- ═════════════════ MAIN ═════════════════ -->
+<main>
+
+<!-- ═══════════════════════════════════════
+     色彩系统
+═══════════════════════════════════════ -->
+<section id="colors">
+  <h2><span class="icon">🎨</span> 色彩系统</h2>
+
+  <div class="intro">
+    <p>CSS 变量定义在 <code>:root</code> 中，统一管理配色体系。</p>
+    <p>关键词：<code>CSS变量</code> <code>HSL配色</code> <code>渐变色</code> <code>透明色</code></p>
+  </div>
+
+  <h3>主色系</h3>
+  <div class="swatch-grid">
+    <div class="swatch" style="background:#7c3aed" title="#7c3aed"></div>
+    <div class="swatch" style="background:#06b6d4" title="#06b6d4"></div>
+    <div class="swatch" style="background:#f59e0b" title="#f59e0b"></div>
+    <div class="swatch" style="background:#10b981" title="#10b981"></div>
+    <div class="swatch" style="background:#ef4444" title="#ef4444"></div>
+    <div class="swatch" style="background:#3b82f6" title="#3b82f6"></div>
+    <div class="swatch" style="background:#ec4899" title="#ec4899"></div>
+    <div class="swatch" style="background:#0ff" title="#0ff 青色"></div>
+  </div>
+
+  <h3>背景/表面</h3>
+  <div class="swatch-grid">
+    <div class="swatch" style="background:#0a0a0f; border: 1px solid #333" title="#0a0a0f"></div>
+    <div class="swatch" style="background:#111118; border: 1px solid #333" title="#111118"></div>
+    <div class="swatch" style="background:#1e1e2e; border: 1px solid #444" title="#1e1e2e"></div>
+    <div class="swatch" style="background:#0d1117; border: 1px solid #333" title="#0d1117"></div>
+  </div>
+
+  <div class="tag-grid" style="margin-top:1rem">
+    <span class="tag" onclick="copyTag(this)">#7c3aed</span>
+    <span class="tag" onclick="copyTag(this)">#06b6d4</span>
+    <span class="tag" onclick="copyTag(this)">rgba(124,58,237,0.3)</span>
+    <span class="tag" onclick="copyTag(this)">backdrop-filter: blur(20px)</span>
+    <span class="tag" onclick="copyTag(this)">linear-gradient(135deg, ...)</span>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     按钮效果
+═══════════════════════════════════════ -->
+<section id="buttons">
+  <h2><span class="icon">🔘</span> 按钮效果</h2>
+
+  <div class="tag-grid">
+    <span class="tag">霓虹辉光</span>
+    <span class="tag">玻璃态按钮</span>
+    <span class="tag">涟漪效果</span>
+    <span class="tag">粒子爆炸</span>
+    <span class="tag">边框流动</span>
+    <span class="tag">磁吸悬停</span>
+    <span class="tag">滑块切换</span>
+    <span class="tag">3D按压</span>
+    <span class="tag">渐变背景</span>
+    <span class="tag">阴影动画</span>
+  </div>
+
+  <div class="demo-area">
+    <span class="label">效果展示</span>
+    <button class="btn-neon" onclick="showToast('霓虹辉光按钮 clicked!','success')"><span>霓虹辉光</span></button>
+    <button class="btn-glass" onclick="showToast('玻璃态按钮 clicked!','success')">玻璃态按钮</button>
+    <button class="btn-ripple" onclick="ripple(event,this)">涟漪效果</button>
+    <button class="btn-particle" id="particleBtn" onclick="particleExplode(this)">粒子爆炸</button>
+    <button class="btn-border-flow" onclick="showToast('边框流动 clicked!','success')">边框流动</button>
+    <button class="btn-magnetic" onclick="showToast('磁吸悬停 clicked!','success')">磁吸悬停</button>
+    <button class="toggle-btn" id="toggle1" onclick="toggleSwitch(this)"></button>
+  </div>
+
+  <h3>关键词速查</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="lang">关键词</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+    <div class="code-body"><pre><span class="kw">霓虹辉光</span> → box-shadow + ::before 填充动画
+<span class="kw">玻璃态</span> → backdrop-filter: blur() + rgba背景
+<span class="kw">涟漪</span> → ::after + transform: scale() + border-radius: 50%
+<span class="kw">边框流动</span> → background + background-size + @keyframes
+<span class="kw">磁吸</span> → box-shadow扩展 + 颜色发光
+<span class="kw">3D按压</span> → transform: scale() + box-shadow变化
+<span class="kw">滑块切换</span> → ::after + translateX + transition</pre></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     背景效果
+═══════════════════════════════════════ -->
+<section id="backgrounds">
+  <h2><span class="icon">🌌</span> 背景效果</h2>
+
+  <div class="tag-grid">
+    <span class="tag">极光背景</span>
+    <span class="tag">星空背景</span>
+    <span class="tag">粒子漂浮</span>
+    <span class="tag">渐变网格</span>
+    <span class="tag">液态波纹</span>
+    <span class="tag">毛玻璃</span>
+    <span class="tag">扫描线</span>
+    <span class="tag">CRT效果</span>
+    <span class="tag">动态渐变</span>
+  </div>
+
+  <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:1rem; margin-top:1rem">
+    <div style="position:relative; height:140px; border-radius:12px; overflow:hidden;">
+      <div class="bg-aurora"></div>
+      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#0ff;font-size:0.8rem;z-index:1">极光背景 aurora</div>
+    </div>
+    <div style="position:relative; height:140px; border-radius:12px; overflow:hidden;">
+      <div class="bg-stars scanlines crt"></div>
+      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.8rem;z-index:1">星空 stars + CRT</div>
+    </div>
+    <div style="position:relative; height:140px; border-radius:12px; overflow:hidden;">
+      <div class="bg-particles" id="particleBg"></div>
+      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--accent2);font-size:0.8rem;z-index:1">粒子漂浮 particles</div>
+    </div>
+    <div style="position:relative; height:140px; border-radius:12px; overflow:hidden;">
+      <div class="bg-liquid"></div>
+      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.8rem;z-index:1">液态波纹 liquid</div>
+    </div>
+    <div style="position:relative; height:140px; border-radius:12px; overflow:hidden;">
+      <div class="bg-gradient-grid"></div>
+      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:0.8rem;z-index:1">渐变网格 grid</div>
+    </div>
+    <div style="position:relative; height:140px; border-radius:12px; overflow:hidden;">
+      <div class="bg-glass"></div>
+      <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.6);font-size:0.8rem;z-index:1">毛玻璃 glass</div>
+    </div>
+  </div>
+
+  <h3>关键词速查</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="lang">关键词</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+    <div class="code-body"><pre><span class="kw">极光</span> → radial-gradient + @keyframes + transform
+<span class="kw">星空</span> → radial-gradient + background-size + animation透明度
+<span class="kw">粒子漂浮</span> → 多个span + @keyframes translateY + opacity
+<span class="kw">渐变网格</span> → repeating-linear-gradient + background-size动画
+<span class="kw">液态</span> → radial-gradient椭圆 + @keyframes rotate + scale
+<span class="kw">毛玻璃</span> → backdrop-filter: blur() + rgba半透明背景
+<span class="kw">扫描线</span> → repeating-linear-gradient(0deg, 透明 2px, 黑色 2px, 黑色 4px)
+<span class="kw">CRT</span> → radial-gradient ellipse 中心透明外部暗角
+<span class="kw">动态渐变</span> → @keyframes + background-position</pre></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     卡片效果
+═══════════════════════════════════════ -->
+<section id="cards">
+  <h2><span class="icon">🃏</span> 卡片效果</h2>
+
+  <div class="tag-grid">
+    <span class="tag">3D翻转</span>
+    <span class="tag">悬浮上浮</span>
+    <span class="tag">边框渐变</span>
+    <span class="tag">玻璃态卡片</span>
+    <span class="tag">图片遮罩毛玻璃</span>
+    <span class="tag">磁吸扭曲</span>
+    <span class="tag">视差倾斜</span>
+    <span class="tag">内容滑入</span>
+  </div>
+
+  <div class="demo-area" style="flex-direction:row; flex-wrap:wrap; gap:2rem; min-height:200px">
+    <div class="card-3d">
+      <div class="card-3d-inner">
+        <div class="card-3d-front">正面 👆</div>
+        <div class="card-3d-back">背面 ← 翻转</div>
+      </div>
+    </div>
+    <div class="card-hover-lift">悬浮上浮 ↑</div>
+    <div class="card-border-gradient">边框渐变</div>
+    <div class="card-glass">毛玻璃卡片</div>
+    <div class="card-glass-overlay">
+      <div class="card-text">悬停看详情 ↗</div>
+    </div>
+  </div>
+
+  <h3>关键词速查</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="lang">关键词</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+    <div class="code-body"><pre><span class="kw">3D翻转</span> → perspective + preserve-3d + rotateY(180deg) + backface-visibility
+<span class="kw">悬浮上浮</span> → transform: translateY(-8px) + box-shadow扩展
+<span class="kw">边框渐变</span> → -webkit-mask + linear-gradient padding-box + mask-composite
+<span class="kw">玻璃态卡片</span> → backdrop-filter: blur() + rgba背景 + 细边框
+<span class="kw">图片遮罩</span> → ::before渐变遮罩 + transform: translateY 文字滑入
+<span class="kw">磁吸扭曲</span> → mousemove计算偏移 + skew + scale</pre></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     文字效果
+═══════════════════════════════════════ -->
+<section id="text">
+  <h2><span class="icon">✒️</span> 文字效果</h2>
+
+  <div class="tag-grid">
+    <span class="tag">3D渐变文字</span>
+    <span class="tag">故障艺术</span>
+    <span class="tag">流光文字</span>
+    <span class="tag">火焰文字</span>
+    <span class="tag">霓虹发光</span>
+    <span class="tag">打字机</span>
+    <span class="tag">波浪文字</span>
+    <span class="tag">金属质感</span>
+    <span class="tag">渐变填充</span>
+  </div>
+
+  <div class="demo-area" style="flex-direction:column; gap:1.5rem; min-height:280px">
+    <div class="text-3d">3D 渐变文字</div>
+    <div class="text-glitch" data-text="故障艺术">故障艺术</div>
+    <div class="text-shimmer" data-text="流光文字特效">流光文字特效</div>
+    <div class="text-fire">🔥 火焰文字</div>
+    <div class="text-neon-glow">霓虹灯效果</div>
+    <div class="text-typing">Hello, Herme_s! 👋</div>
+  </div>
+
+  <h3>关键词速查</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="lang">关键词</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+    <div class="code-body"><pre><span class="kw">3D渐变文字</span> → background-clip: text + -webkit-text-fill-color: transparent + drop-shadow
+<span class="kw">故障艺术 glitch</span> → text-shadow多色偏移 + @keyframes随机位移
+<span class="kw">流光文字</span> → ::after + clip-path: inset() + 渐变背景
+<span class="kw">火焰</span> → text-shadow多层橙色/红色叠加 + @keyframes闪烁
+<span class="kw">霓虹灯</span> → text-shadow多层同色叠加(5px/10px/20px/40px) + animation
+<span class="kw">打字机</span> → width: 0 → Nch + clip-path: inset(0 100% 0 0) + steps(N) + border-color animation
+<span class="kw">波浪</span> → @keyframes translateY不同相位 + display: inline-block
+<span class="kw">金属质感</span> → linear-gradient水平金属色 + background-clip: text + 强text-shadow</pre></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     加载动画
+═══════════════════════════════════════ -->
+<section id="loaders">
+  <h2><span class="icon">⏳</span> 加载动画</h2>
+
+  <div class="tag-grid">
+    <span class="tag">跳动点</span>
+    <span class="tag">旋转环</span>
+    <span class="tag">脉冲球</span>
+    <span class="tag">进度条</span>
+    <span class="tag">水波纹</span>
+    <span class="tag">方块堆叠</span>
+    <span class="tag">打字加载</span>
+  </div>
+
+  <div class="demo-area">
+    <div class="loader-dots"><span></span><span></span><span></span></div>
+    <div class="loader-spinner"></div>
+    <div class="loader-pulse"></div>
+    <div class="loader-bar"></div>
+  </div>
+
+  <h3>关键词速查</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="lang">关键词</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+    <div class="code-body"><pre><span class="kw">跳动点</span> → 3个span + scale(0.6→1.2) + animation-delay错开
+<span class="kw">旋转环</span> → border-radius:50% + border-top-color + @keyframes to(360deg)
+<span class="kw">脉冲</span> → scale(0.8→1.2) + opacity(1→0.4) + infinite
+<span class="kw">进度条滑块</span> → ::after + translateX(-100%→350%) + linear-gradient
+<span class="kw">水波纹扩散</span> → 多层::before/::after + scale(1→2) + opacity(1→0) + infinite
+<span class="kw">打字加载</span> → width 0→Nch + steps(N) + border-right-color toggle</pre></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     输入框效果
+═══════════════════════════════════════ -->
+<section id="inputs">
+  <h2><span class="icon">⌨️</span> 输入框效果</h2>
+
+  <div class="tag-grid">
+    <span class="tag">发光边框</span>
+    <span class="tag">浮动标签</span>
+    <span class="tag">下划线动画</span>
+    <span class="tag">填充背景</span>
+  </div>
+
+  <div class="demo-area" style="flex-direction:column; gap:1.5rem; min-height:160px">
+    <input class="input-glow" type="text" placeholder="聚焦时发光..." onclick="showToast('聚焦输入框','success')">
+    <div class="input-float-label">
+      <input type="text" id="floatInput" placeholder=" " onclick="showToast('浮动标签输入框','success')">
+      <label for="floatInput">用户名 / Email</label>
+    </div>
+  </div>
+
+  <h3>关键词速查</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="lang">关键词</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+    <div class="code-body"><pre><span class="kw">发光边框</span> → :focus { border-color: accent; box-shadow: 0 0 12px rgba(); }
+<span class="kw">浮动标签</span> → label absolute + input:focus ~ label → top(0.4rem) scale(0.7)
+<span class="kw">下划线动画</span> → ::after scaleX(0→1) + transform-origin: left
+<span class="kw">填充背景</span> → :focus → background-color rgba填充 + color变化</pre></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     鼠标交互
+═══════════════════════════════════════ -->
+<section id="mouse">
+  <h2><span class="icon">🖱️</span> 鼠标交互效果</h2>
+
+  <div class="tag-grid">
+    <span class="tag">鼠标拖尾</span>
+    <span class="tag">光点跟随</span>
+    <span class="tag">点击爆炸</span>
+    <span class="tag">自定义光标</span>
+    <span class="tag">右键菜单</span>
+    <span class="tag">悬停放大</span>
+    <span class="tag">磁性吸附</span>
+  </div>
+
+  <div class="demo-area" style="position:relative; min-height:200px; cursor:none" id="mouseDemo">
+    <span class="label">在区域内移动鼠标 & 点击</span>
+    <div id="cursorFollower" style="position:absolute;width:30px;height:30px;border:2px solid var(--accent);border-radius:50%;pointer-events:none;transition:transform 0.12s ease-out;opacity:0.6;transform:translate(-50%,-50%)"></div>
+    <div style="color:var(--muted);font-size:0.82rem;text-align:center">移动鼠标 + 点击查看爆炸效果</div>
+  </div>
+
+  <h3>关键词速查</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="lang">关键词</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+    <div class="code-body"><pre><span class="kw">鼠标拖尾</span> → mousemove + 创建span + setTimeout删除 + requestAnimationFrame
+<span class="kw">光点跟随</span> → mousemove + transform: translate() + transition: 0.12s
+<span class="kw">点击爆炸</span> → click + 创建N个span粒子 + --dx/--dy随机 + @keyframes
+<span class="kw">自定义光标</span> → cursor: none + 固定position div跟随mouse
+<span class="kw">磁性吸附</span> → mousemove计算距离 + 距离&lt;阈值时translate向鼠标
+<span class="kw">3D倾斜</span> → mousemove + rotateX/Y根据坐标计算角度 + perspective</pre></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     滚动动画
+═══════════════════════════════════════ -->
+<section id="scroll">
+  <h2><span class="icon">📜</span> 滚动动画</h2>
+
+  <div class="tag-grid">
+    <span class="tag">滚动渐入</span>
+    <span class="tag">视差滚动</span>
+    <span class="tag">进度指示</span>
+    <span class="tag">锚点滚动</span>
+    <span class="tag">滚动触发</span>
+    <span class="tag">粘性导航</span>
+  </div>
+
+  <div class="demo-area" style="flex-direction:column; gap:1rem; min-height:300px; align-items:flex-start; overflow:hidden">
+    <div class="scroll-reveal" style="padding:1rem;background:var(--code-bg);border-radius:8px;border-left:3px solid var(--accent);font-size:0.85rem">
+      ⬇️ 向下滚动 → 这个方块会淡入出现
+    </div>
+    <div class="scroll-reveal" style="padding:1rem;background:var(--code-bg);border-radius:8px;border-left:3px solid var(--accent2);font-size:0.85rem">
+      ⬇️ 再往下滚动 → 第二个也出现了
+    </div>
+    <div class="scroll-reveal" style="padding:1rem;background:var(--code-bg);border-radius:8px;border-left:3px solid var(--accent3);font-size:0.85rem">
+      ✅ 全部显示了！IntersectionObserver 监听滚动
+    </div>
+  </div>
+
+  <h3>关键词速查</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="lang">关键词</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+    <div class="code-body"><pre><span class="kw">滚动渐入</span> → IntersectionObserver + isIntersecting → classList.add('visible')
+<span class="kw">视差</span> → scroll监听 + transform: translateY(scrollY * ratio)
+<span class="kw">进度指示</span> → scrollTop / (scrollHeight - clientHeight) → width%
+<span class="kw">粘性导航</span> → position: sticky + top: 0 + z-index</pre></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     标签页
+═══════════════════════════════════════ -->
+<section id="tabs">
+  <h2><span class="icon">📑</span> 标签页</h2>
+
+  <div class="tag-grid">
+    <span class="tag">下划线滑动</span>
+    <span class="tag">渐变切换</span>
+    <span class="tag">胶囊切换</span>
+    <span class="tag">手风琴折叠</span>
+  </div>
+
+  <div class="tabs-demo">
+    <div class="tab-headers-demo">
+      <button class="tab-btn-demo active" onclick="switchTab(this,'tab1')">效果 1</button>
+      <button class="tab-btn-demo" onclick="switchTab(this,'tab2')">效果 2</button>
+      <button class="tab-btn-demo" onclick="switchTab(this,'tab3')">效果 3</button>
+    </div>
+    <div class="tab-content-demo active" id="tab1">🎨 这里展示了第一个标签的内容，点击切换标签可以看到不同效果的出现方式。</div>
+    <div class="tab-content-demo" id="tab2">🃏 标签页切换是最常用的导航模式之一，支持下划线滑动、渐变、胶囊等多种样式。</div>
+    <div class="tab-content-demo" id="tab3">✨ 手风琴折叠是标签页的变体，一次只展开一个面板，适合 FAQ 场景。</div>
+  </div>
+
+  <h3>关键词速查</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="lang">关键词</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+    <div class="code-body"><pre><span class="kw">下划线滑动</span> → ::after + transform: scaleX() + transition + JS设置width/left
+<span class="kw">渐变切换</span> → opacity: 0→1 + display:none/block + transition
+<span class="kw">胶囊切换</span> → 背景div absolute + transform: translateX(N * 100%)
+<span class="kw">手风琴</span> → max-height: 0→scrollHeight + overflow: hidden + transition</pre></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     弹窗
+═══════════════════════════════════════ -->
+<section id="modal">
+  <h2><span class="icon">🪟</span> 弹窗 / 模态框</h2>
+
+  <div class="tag-grid">
+    <span class="tag">居中弹窗</span>
+    <span class="tag">侧边滑入</span>
+    <span class="tag">底部弹出</span>
+    <span class="tag">全屏遮罩</span>
+    <span class="tag">成功确认框</span>
+  </div>
+
+  <div class="demo-area">
+    <button class="btn-glass" onclick="openModal()">打开弹窗</button>
+  </div>
+
+  <h3>关键词速查</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="lang">关键词</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+    <div class="code-body"><pre><span class="kw">居中弹窗</span> → fixed inset:0 + backdrop-filter:blur + flex + animation slideUp
+<span class="kw">侧边滑入</span> → transform: translateX(100%)→0 + transition
+<span class="kw">底部弹出</span> → transform: translateY(100%)→0 + border-radius top
+<span class="kw">全屏遮罩</span> → rgba(0,0,0,0.7) + backdrop-filter:blur(8px)</pre></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     Toast 提示
+═══════════════════════════════════════ -->
+<section id="toast">
+  <h2><span class="icon">🔔</span> Toast 提示</h2>
+
+  <div class="tag-grid">
+    <span class="tag">Toast 成功</span>
+    <span class="tag">Toast 错误</span>
+    <span class="tag">Toast 滑入</span>
+    <span class="tag">多消息队列</span>
+  </div>
+
+  <div class="demo-area">
+    <button class="btn-ripple" onclick="showToast('操作成功！','success')">✅ 成功</button>
+    <button class="btn-neon" onclick="showToast('出错了，请重试','error')"><span>❌ 错误</span></button>
+    <button class="btn-glass" onclick="showToast('这是一条普通提示')">💬 提示</button>
+  </div>
+
+  <h3>关键词速查</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="lang">关键词</span><button class="copy-btn" onclick="copyCode(this)">复制</button></div>
+    <div class="code-body"><pre><span class="kw">Toast</span> → fixed bottom-right + animation translateX + setTimeout自动删除
+<span class="kw">成功/错误</span> → border-left: 3px solid + success绿/error红
+<span class="kw">多队列</span> → 每条toast设置不同的animation-delay或translateY堆叠</pre></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     关键词总表
+═══════════════════════════════════════ -->
+<section id="keywords">
+  <h2><span class="icon">📋</span> 关键词总表</h2>
+
+  <div class="intro">
+    <p>直接在对话中发送以下关键词，我会生成对应的效果代码。</p>
+  </div>
+
+  <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:1rem; margin-top:1rem">
+    <div class="intro">
+      <p style="color:var(--accent3);font-weight:bold;margin-bottom:0.5rem">🔘 按钮</p>
+      <p><code>霓虹辉光按钮</code> <code>玻璃态按钮</code> <code>涟漪按钮</code></p>
+      <p><code>粒子爆炸按钮</code> <code>边框流动按钮</code> <code>磁吸悬停按钮</code></p>
+      <p><code>3D按压按钮</code> <code>渐变背景按钮</code> <code>滑块切换</code></p>
+    </div>
+    <div class="intro">
+      <p style="color:var(--accent3);font-weight:bold;margin-bottom:0.5rem">🌌 背景</p>
+      <p><code>极光背景</code> <code>星空背景</code> <code>粒子漂浮背景</code></p>
+      <p><code>渐变网格背景</code> <code>液态波纹背景</code> <code>毛玻璃背景</code></p>
+      <p><code>扫描线效果</code> <code>CRT效果</code> <code>动态渐变背景</code></p>
+    </div>
+    <div class="intro">
+      <p style="color:var(--accent3);font-weight:bold;margin-bottom:0.5rem">🃏 卡片</p>
+      <p><code>3D翻转卡片</code> <code>悬浮上浮卡片</code> <code>边框渐变卡片</code></p>
+      <p><code>玻璃态卡片</code> <code>图片遮罩毛玻璃卡片</code> <code>磁吸扭曲卡片</code></p>
+      <p><code>3D倾斜卡片</code> <code>内容滑入卡片</code></p>
+    </div>
+    <div class="intro">
+      <p style="color:var(--accent3);font-weight:bold;margin-bottom:0.5rem">✒️ 文字</p>
+      <p><code>3D渐变文字</code> <code>故障艺术文字</code> <code>流光文字</code></p>
+      <p><code>火焰文字</code> <code>霓虹发光文字</code> <code>打字机效果</code></p>
+      <p><code>波浪文字</code> <code>金属质感文字</code> <code>填充动画文字</code></p>
+    </div>
+    <div class="intro">
+      <p style="color:var(--accent3);font-weight:bold;margin-bottom:0.5rem">⏳ 加载</p>
+      <p><code>跳动点加载</code> <code>旋转环加载</code> <code>脉冲球加载</code></p>
+      <p><code>进度条加载</code> <code>水波纹加载</code> <code>方块堆叠加载</code></p>
+      <p><code>骨架屏</code> <code>打字加载动画</code></p>
+    </div>
+    <div class="intro">
+      <p style="color:var(--accent3);font-weight:bold;margin-bottom:0.5rem">🖱️ 交互</p>
+      <p><code>鼠标拖尾</code> <code>光点跟随</code> <code>点击爆炸粒子</code></p>
+      <p><code>自定义光标</code> <code>磁性吸附</code> <code>3D倾斜</code></p>
+      <p><code>滚动渐入</code> <code>视差滚动</code> <code>粘性导航</code></p>
+    </div>
+    <div class="intro">
+      <p style="color:var(--accent3);font-weight:bold;margin-bottom:0.5rem">🪟 其他</p>
+      <p><code>发光输入框</code> <code>浮动标签输入框</code> <code>下划线动画输入框</code></p>
+      <p><code>Toast提示</code> <code>居中弹窗</code> <code>侧边滑入面板</code></p>
+      <p><code>标签页切换</code> <code>手风琴折叠</code> <code>滑块验证码</code></p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ═════════════════ MODAL ═════════════════ -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <h3>🎉 弹窗效果展示</h3>
+    <p>这是一个居中弹窗示例，带毛玻璃遮罩和滑入动画。点击外部区域或下方按钮关闭。</p>
+    <button class="btn-ripple" onclick="closeModal()" style="width:100%">知道了，关闭</button>
+  </div>
+</div>
+
+<!-- ═════════════════ TOAST ═════════════════ -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ═══════════════════════════════════════
+// 导航高亮
+// ═══════════════════════════════════════
+const navLinks = document.querySelectorAll('.nav a');
+const sections = document.querySelectorAll('section[id]');
+
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(sec => {
+    const rect = sec.getBoundingClientRect();
+    if (rect.top <= 120) current = sec.id;
+  });
+  navLinks.forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+  });
+});
+
+// ═══════════════════════════════════════
+// 复制关键词
+// ═══════════════════════════════════════
+function copyTag(el) {
+  const text = el.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('已复制: ' + text, 'success');
+  });
+}
+
+function copyCode(btn) {
+  const block = btn.closest('.code-block');
+  const code = block.querySelector('pre').innerText;
+  navigator.clipboard.writeText(code).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = '已复制!';
+    setTimeout(() => btn.textContent = orig, 1500);
+  });
+}
+
+// ═══════════════════════════════════════
+// 按钮效果
+// ═══════════════════════════════════════
+function ripple(event, btn) {
+  const rect = btn.getBoundingClientRect();
+  const x = event.clientX - rect.left;
+  const y = event.clientY - rect.top;
+  const ripple = document.createElement('span');
+  ripple.style.cssText = `position:absolute;left:${x}px;top:${y}px;width:0;height:0;border-radius:50%;background:rgba(255,255,255,0.5);transform:scale(0);transition:transform 0.5s,opacity 0.5s;pointer-events:none;`;
+  btn.style.position = 'relative';
+  btn.style.overflow = 'hidden';
+  btn.appendChild(ripple);
+  requestAnimationFrame(() => {
+    ripple.style.transform = 'scale(4)';
+    ripple.style.opacity = '0';
+  });
+  setTimeout(() => ripple.remove(), 600);
+}
+
+function particleExplode(btn) {
+  const rect = btn.getBoundingClientRect();
+  const colors = ['#7c3aed','#06b6d4','#f59e0b','#10b981','#ef4444','#ec4899'];
+  for (let i = 0; i < 12; i++) {
+    const p = document.createElement('span');
+    const angle = (i / 12) * Math.PI * 2;
+    const dist = 60 + Math.random() * 40;
+    const dx = Math.cos(angle) * dist;
+    const dy = Math.sin(angle) * dist;
+    p.style.cssText = `position:fixed;left:${rect.left+rect.width/2}px;top:${rect.top+rect.height/2}px;width:8px;height:8px;border-radius:50%;background:${colors[i%colors.length]};pointer-events:none;z-index:9999;animation:particleExplode 0.7s ease-out forwards;--dx:${dx}px;--dy:${dy}px;`;
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 700);
+  }
+  showToast('粒子爆炸！🎉', 'success');
+}
+
+// ═══════════════════════════════════════
+// 滑块切换
+// ═══════════════════════════════════════
+function toggleSwitch(btn) {
+  btn.classList.toggle('on');
+  showToast(btn.classList.contains('on') ? '开关: ON ✅' : '开关: OFF', 'success');
+}
+
+// ═══════════════════════════════════════
+// 粒子背景
+// ═══════════════════════════════════════
+(function initParticles() {
+  const container = document.getElementById('particleBg');
+  if (!container) return;
+  for (let i = 0; i < 15; i++) {
+    const p = document.createElement('span');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDuration = (5 + Math.random() * 8) + 's';
+    p.style.animationDelay = Math.random() * 5 + 's';
+    p.style.width = (3 + Math.random() * 4) + 'px';
+    p.style.height = p.style.width;
+    p.style.opacity = 0.3 + Math.random() * 0.5;
+    container.appendChild(p);
+  }
+})();
+
+// ═══════════════════════════════════════
+// 鼠标跟随
+// ═══════════════════════════════════════
+const mouseDemo = document.getElementById('mouseDemo');
+const cursorFollower = document.getElementById('cursorFollower');
+
+if (mouseDemo && cursorFollower) {
+  mouseDemo.addEventListener('mousemove', e => {
+    const rect = mouseDemo.getBoundingClientRect();
+    cursorFollower.style.left = (e.clientX - rect.left) + 'px';
+    cursorFollower.style.top = (e.clientY - rect.top) + 'px';
+  });
+
+  mouseDemo.addEventListener('mouseleave', () => {
+    cursorFollower.style.opacity = '0';
+  });
+  mouseDemo.addEventListener('mouseenter', () => {
+    cursorFollower.style.opacity = '0.6';
+  });
+
+  mouseDemo.addEventListener('click', e => {
+    const rect = mouseDemo.getBoundingClientRect();
+    const cx = e.clientX;
+    const cy = e.clientY;
+    const colors = ['#7c3aed','#06b6d4','#f59e0b','#10b981'];
+    for (let i = 0; i < 10; i++) {
+      const p = document.createElement('span');
+      p.className = 'explosion-particle';
+      const angle = (i / 10) * Math.PI * 2;
+      const dist = 50 + Math.random() * 50;
+      p.style.cssText = `left:${cx}px;top:${cy}px;background:${colors[i%4]};--dx:${Math.cos(angle)*dist}px;--dy:${Math.sin(angle)*dist}px;`;
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), 600);
+    }
+  });
+}
+
+// ═══════════════════════════════════════
+// 滚动渐入
+// ═══════════════════════════════════════
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.15 });
+
+document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
+
+// ═══════════════════════════════════════
+// 标签页
+// ═══════════════════════════════════════
+function switchTab(btn, tabId) {
+  const parent = btn.closest('.tabs-demo');
+  parent.querySelectorAll('.tab-btn-demo').forEach(b => b.classList.remove('active'));
+  parent.querySelectorAll('.tab-content-demo').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(tabId).classList.add('active');
+}
+
+// ═══════════════════════════════════════
+// 弹窗
+// ═══════════════════════════════════════
+function openModal() {
+  document.getElementById('modalOverlay').classList.add('show');
+}
+function closeModal(e) {
+  if (e && e.target !== e.currentTarget) return;
+  document.getElementById('modalOverlay').classList.remove('show');
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// ═══════════════════════════════════════
+// Toast
+// ═══════════════════════════════════════
+let toastQueue = [];
+function showToast(message, type = 'info') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = message;
+  container.appendChild(toast);
+
+  // 同一时间最多显示3条
+  const toasts = container.querySelectorAll('.toast');
+  if (toasts.length > 3) toasts[0].remove();
+
+  setTimeout(() => {
+    if (toast.parentNode) toast.remove();
+  }, 3000);
+}
+
+// ═══════════════════════════════════════
+// 粒子爆炸 keyframes 注入
+// ═══════════════════════════════════════
+const style = document.createElement('style');
+style.textContent = `
+@keyframes particleExplode {
+  0% { transform: translate(0,0) scale(1); opacity: 1; }
+  100% { transform: translate(var(--dx),var(--dy)) scale(0); opacity: 0; }
+}
+`;
+document.head.appendChild(style);
+</script>
+
+</body>
+</html>
